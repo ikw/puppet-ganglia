@@ -1,6 +1,6 @@
 # $Id$
 
-class ganglia::webfrontend {
+class ganglia::webfrontend inherits ganglia::metaserver::common {
   $ganglia_webfrontend = "${fqdn}"  
     include webserver::apache2::basic
     package{["libapache2-mod-php5", "libgd2-xpm"]:
@@ -21,5 +21,8 @@ class ganglia::webfrontend {
   }
   package{"ganglia-webfrontend":
     ensure => "latest",
-  }  
+  } 
+
+#collect the meta configs for this host.  
+  File <<| tag == "ganglia_metad_all" |>> 
 }
