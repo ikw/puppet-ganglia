@@ -1,42 +1,57 @@
 # $Id$
 
+$ganglia_metacollects = "/var/lib/puppet/exported/ganglia-metad"
 class ganglia::metaserver::common {
-  file{"${ganglia-metacollects}":
-    ensure => "directory",
-  }
-
-  $ganglia-metaconf = "/etc/ganglia/gmetad.conf"
+  $ganglia_metaconf = "/etc/ganglia/gmetad.conf"
     $package = "gmetad"
-
-    package{"${package}":
-      ensure => "latest",
-	     before => [ Service["gmetad"], Exec["generate-metadconf"] ],
+    file{"${ganglia_metacollects}":
+      ensure => "directory",
+	     owner => "root",
+	     mode => 0700,
     }
+
+  package{"${package}":
+    ensure => "3.1.2-ikw-1",
+	   before => [ Service["gmetad"], Exec["generate-metadconf"] ],
+  }
 
   service{"gmetad":
     ensure => "running",
 	   enable => "true",
 	   subscribe => Exec["generate-metadconf"],
+	   require => Package["${package}"],
   }
 
-  file{"${ganglia-metacollects}/0000-gmetad.conf":
+  file{"${ganglia_metacollects}/0000-gmetad.conf":
     content => template("ganglia/ganglia-metad-conf.erb"),
 	    ensure => "present",
 	    notify => Exec["generate-metadconf"],  
+	    require => [ Package["${package}"], File["${ganglia_metacollects}"] ],
   }
-  @@file{"${ganglia-metacollects}/meta-${fqdn}":
-    tag => [ "ganglia_metad_all", "ganglia_metad_${hostname}" ]
-      ensure => "present",
-	     notify => Exec["generate-metadconf"],
+
+  @@file{"${ganglia_metacollects}/meta-all-${fqdn}":
+    tag => "ganglia_metad_all",
+	ensure => "present",
+	notify => Exec["generate-metadconf"],
+	content => template("ganglia/ganglia-datasource-all.erb"),
   }
+  
 ### generate the configuration file
   exec{"generate-metadconf":
-    command => "cat ${ganglia-metacollects/* >${ganglia-metaconf}",
+    command => "cat ${ganglia_metacollects}/* >${ganglia_metaconf}",
 	    refreshonly => "true",
+	    require => Package["${package}"],
   } 
 }
 
-class ganglia::metaserver inherits ganglia::metaserver::common {
+class ganglia::metaserver {
+  include ganglia::metaserver::common
+    file{"${ganglia_metacollects}/meta-${fqdn}":
+      ensure => "present",
+	     notify => Exec["generate-metadconf"],
+	     content => template("ganglia/ganglia-datasource.erb"),
+    }
+
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_${hostname}" |>>
 }
