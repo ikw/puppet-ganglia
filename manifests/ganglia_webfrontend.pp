@@ -1,6 +1,7 @@
 # $Id$
 
 class ganglia::webfrontend {
+  $graphd_dir = "/usr/share/ganglia-webfrontend/graph.d"
   include ganglia::metaserver::common
     include webserver::apache2::basic
     package{["libapache2-mod-php5", "libgd2-xpm"]:
@@ -24,5 +25,10 @@ class ganglia::webfrontend {
   } 
 
 #collect the meta configs for this host.  
-  File <<| tag == "ganglia_metad_all" |>> 
+  File <<| tag == "ganglia_metad_all" |>>
+  
+  ##add some additional pages
+  file{"${graphd_dir}/diskfree_report.php":
+      source => "puppet:///ganglia/contrib/diskfree_report.php",
+  }
 }
