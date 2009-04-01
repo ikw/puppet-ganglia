@@ -25,35 +25,35 @@ class ganglia::monitor {
 	    require => Package["${package}"],
   }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
-      tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
-    ensure => "present",
-    notify => Exec["generate-metadconf"],
-    content => template("ganglia/ganglia-datasource-cluster.erb"),
-    }   
+    tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
+	ensure => "present",
+	notify => Exec["generate-metadconf"],
+	content => template("ganglia/ganglia-datasource-cluster.erb"),
+  }   
 
-  ### metrics configuration
-file{"${ganglia_metrics}":
-ensure => "directory",
-      owner => "root",
-      mode => 0700
-}
-file{"${ganglia_metrics_cron}":
-ensure => "directory",
-    owner => "root",
-    mode => 0700,
-    require => File["${ganglia_metrics}"],
-}
-file{"${ganglia_metrics}/run-metrics.sh":
-  source => "puppet:///ganglia/run-metrics.sh",
-    mode => 0700,
-    owner => root,
-  require => File["${ganglia_metrics}"],
-}
-cron{"ganglia-runmetrics":
-  require => File["${ganglia_metrics}/run-metrics.sh"],
-    command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}",
-    user => root,
-    minute => "*",
-    hour => "*",
-}
+### metrics configuration
+  file{"${ganglia_metrics}":
+    ensure => "directory",
+	   owner => "root",
+	   mode => 0700
+  }
+  file{"${ganglia_metrics_cron}":
+    ensure => "directory",
+	   owner => "root",
+	   mode => 0700,
+	   require => File["${ganglia_metrics}"],
+  }
+  file{"${ganglia_metrics}/run-metrics.sh":
+    source => "puppet:///ganglia/run-metrics.sh",
+	   mode => 0700,
+	   owner => root,
+	   require => File["${ganglia_metrics}"],
+  }
+  cron{"ganglia-runmetrics":
+    require => File["${ganglia_metrics}/run-metrics.sh"],
+	    command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}",
+	    user => root,
+	    minute => "*",
+	    hour => "*",
+  }
 }

@@ -34,7 +34,7 @@ class ganglia::metaserver::common {
 	notify => Exec["generate-metadconf"],
 	content => template("ganglia/ganglia-datasource-all.erb"),
   }
-  
+
 ### generate the configuration file
   exec{"generate-metadconf":
     command => "cat ${ganglia_metacollects}/* >${ganglia_metaconf}",

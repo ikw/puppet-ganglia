@@ -7,18 +7,18 @@ import "ganglia_*.pp"
 
 
 define ganglia::gmetric(
-  $source="",
-  $ensure="present"
-  )
-  {
-      $source_real = $source ? {
-        "" => "ganglia/metrics/${name}",
-          default => $source
-      }
-      file{"${ganglia_metrics_cron}/${name}":
-          source => "puppet:///${source_real}",
-            owner => root,
-            mode => 0700,
-      ensure => $ensure,
-      }        
+    $source="",
+    $ensure="present"
+    )
+{
+  $source_real = $source ? {
+    "" => "ganglia/metrics/${name}",
+    default => $source
   }
+  file{"${ganglia_metrics_cron}/${name}":
+    source => "puppet:///${source_real}",
+    owner => root,
+    mode => 0700,
+    ensure => $ensure,
+  }        
+}
