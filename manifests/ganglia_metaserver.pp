@@ -1,6 +1,5 @@
 # $Id$
 
-$ganglia_metacollects = "/var/lib/puppet/exported/ganglia-metad"
 class ganglia::metaserver::common {
   $ganglia_metaconf = "/etc/ganglia/gmetad.conf"
     $package = "gmetad"
@@ -47,11 +46,14 @@ class ganglia::metaserver::common {
 class ganglia::metaserver {
   include ganglia::metaserver::common
     file{"${ganglia_metacollects}/meta-${fqdn}":
-      ensure => "present",
+      ensure => "absent",
 	     notify => Exec["generate-metadconf"],
 	     content => template("ganglia/ganglia-datasource.erb"),
     }
 
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_${hostname}" |>>
+#  define metacollect($mcast_port){
+#  File <<| tag == "ganglia_gmond_cluster_${mcast_port}" |>>  
+#  }
 }

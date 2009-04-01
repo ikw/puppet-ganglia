@@ -14,6 +14,7 @@ class ganglia::webfrontend {
 	       serveradmin => "webmaster@ikw.uni-osnabrueck.de",
 	       syncconf => false,
 	       order => "000",
+	       additional => "Alias /munin/ /var/lib/munin/www/",
   }
   webserver::apache2::config{"ganglia-webfrontend":
     ensure => "absent",
