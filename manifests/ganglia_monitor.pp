@@ -10,25 +10,31 @@ class ganglia::monitor {
       default => "ganglia-monitor",
   }
   $service = $kernel ? {
-  "FreeBSD" => "gmond",
-    default => "ganglia-monitor",
-}
-$pathprefix = $kernel ? {
-  "FreeBSD" => "/usr/local",
-    default => "/usr",
-} 
+    "FreeBSD" => "gmond",
+      "Darwin" => "com.42quarks.gmond",
+      default => "ganglia-monitor",
+  }
+  $pathprefix = $kernel ? {
+    "FreeBSD" => "/usr/local",
+      default => "/usr",
+  } 
   case $kernel {
-     "Linux": {
-       package{["libganglia1", "${package}"]:
-          ensure => "3.1.2-ikw-1",
-          before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
-        }      
-     }
-     default: {
-     package{"${package}":
-       before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
-     }
-   }
+    "Linux": {
+      package{["libganglia1", "${package}"]:
+	ensure => "3.1.2-ikw-1",
+	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
+      }      
+    }
+    "Darwin": {
+      pkg_deploy{"ganglia_3.0.7.pkg.dmg": 
+	before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
+      }
+    }
+    default: {
+	       package{"${package}":
+		 before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
+	       }
+	     }
   }   
   service{"${service}":
     ensure => "running",
