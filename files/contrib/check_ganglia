@@ -24,10 +24,10 @@ class GParser:
 
   def start_element(self, name, attrs):
     if name == "HOST":
-      if attrs["NAME"]==self.host:
+      if attrs["NAME"].lower()==self.host:
         self.inhost=1
     elif self.inhost==1 and name == "METRIC" and attrs["NAME"]==self.metric:
-      self.value=attrs["VAL"]
+	self.value=attrs["VAL"]
 
   def end_element(self, name):
     if name == "HOST" and self.inhost==1:
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
   for o, a in options:
     if o in ("-h", "--host"):
-       host = a
+       host = a.lower()
     elif o in ("-m", "--metric"):
        metric = a
     elif o in ("-w", "--warning"):
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     elif o in ("-p", "--port"):
        ganglia_port = int(a)
     elif o in ("-s", "--server"):
-       ganglia_host = a
+       ganglia_host = a.lower()
 
   if critical == None or warning == None or metric == None or host == None:
     usage()
@@ -86,12 +86,24 @@ if __name__ == "__main__":
     print "CHECKGANGLIA UNKNOWN: Error while getting value \"%s\"" % (err)
     sys.exit(3)
 
-  if value >= critical:
-    print "CHECKGANGLIA CRITICAL: %s is %.2f" % (metric, value)
-    sys.exit(2)
-  elif value >= warning:
-    print "CHECKGANGLIA WARNING: %s is %.2f" % (metric, value)
-    sys.exit(1)
+  if critical > warning:
+    if value >= critical:
+      print "CHECKGANGLIA CRITICAL: %s is %.2f" % (metric, value)
+      sys.exit(2)
+    elif value >= warning:
+      print "CHECKGANGLIA WARNING: %s is %.2f" % (metric, value)
+      sys.exit(1)
+    else:
+      print "CHECKGANGLIA OK: %s is %.2f" % (metric, value)
+      sys.exit(0)
   else:
-    print "CHECKGANGLIA OK: %s is %.2f" % (metric, value)
-    sys.exit(0)
+    if critical >= value:
+      print "CHECKGANGLIA CRITICAL: %s is %.2f" % (metric, value)
+      sys.exit(2)
+    elif warning >= value:
+      print "CHECKGANGLIA WARNING: %s is %.2f" % (metric, value)
+      sys.exit(1)
+    else:
+      print "CHECKGANGLIA OK: %s is %.2f" % (metric, value)
+      sys.exit(0)
+ 

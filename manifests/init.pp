@@ -13,7 +13,7 @@ define ganglia::gmetric(
 {
   $source_real = $source ? {
     "" => "ganglia/metrics/${name}",
-    default => $source
+    default => "${source}/${name}",
   }
   file{"${ganglia_metrics_cron}/${name}":
     source => "puppet:///${source_real}",

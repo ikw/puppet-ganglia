@@ -8,7 +8,7 @@ class ganglia::monitor {
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
-      "Darwin" => "ganglia-3.1.2-1.pkg.dmg",
+      "Darwin" => "ganglia-3.1.2-2.pkg.dmg",
       default => "ganglia-monitor",
     }
   $service = $kernel ? {
