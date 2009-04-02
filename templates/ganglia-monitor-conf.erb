@@ -3,15 +3,15 @@
 globals {                    
   daemonize = yes              
   setuid = yes             
-  user = ganglia              
+  user = <%= run_as %>              
   debug_level = 0               
-  max_udp_msg_len = 1472        
+  max_udp_msg_len = 1500        
   mute = no             
   deaf = no             
   host_dmax = 3600 /*secs */ 
   cleanup_threshold = 300 /*secs */ 
   gexec = no             
-  send_metadata_interval = 0     
+ send_metadata_interval = 0   
 } 
 
 /* If a cluster attribute is specified, then all gmond hosts are wrapped inside 
@@ -50,6 +50,7 @@ udp_recv_channel {
 tcp_accept_channel { 
   port = 8649 
 } 
+
 
 /* Each metrics module that is referenced by gmond must be specified and 
    loaded. If the module has been statically linked with gmond, it does not 
@@ -335,4 +336,3 @@ collection_group {
     title = "Maximum Disk Space Used" 
   } 
 }
-
