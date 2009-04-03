@@ -35,12 +35,12 @@ if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (T
       s = %x{du -s "#{dir}" |cut -f 1}.chomp
       size +=  s.to_f
     }
-    %x{gmetric --units="Kilobytes" --name=workusage_#{username} --value=#{size} --type="float"}
+    %x{gmetric --dmax=30000 --tmax=3600 --units="Kilobytes" --name=workusage_#{username} --value=#{size} --type="float"}
   }
   stats.close
 else
   File.new(statefile,"r").each { |line| 
      keyval = line.split(" ")  
-    %x{gmetric --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
+    %x{gmetric --dmax=30000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
   }
 end
