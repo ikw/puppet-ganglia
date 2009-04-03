@@ -1,21 +1,13 @@
 # $Id$
 
 class ganglia::monitor {
-  $ganglia_mconf_dir = $kernel ? {
-    "FreeBSD" => "/usr/local/etc",
-      default => "/etc/ganglia"
-  }
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
       "Darwin" => "ganglia-3.1.2-2.pkg.dmg",
       default => "ganglia-monitor",
     }
-  $service = $kernel ? {
-    "FreeBSD" => "gmond",
-    "Darwin" => "de.ikw.uos.gmond",
-    default => "ganglia-monitor",
-  }
+  
   $pathprefix = $kernel ? {
     "FreeBSD" => "/usr/local",
     default => "/usr",
