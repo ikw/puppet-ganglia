@@ -19,14 +19,14 @@ globals {
  * NOT be wrapped inside of a <CLUSTER> tag. */ 
 cluster { 
   name = "<%= domain %>"
-  owner = "Institute of Cognitive Science" 
-  latlong = "N52.17 E8.01" 
-  url = "https://doc.ikw.uni-osnabrueck.de/" 
+  owner = "<%= company %>" 
+  latlong = "<%= network_location %>" 
+  url = "<%= documentation_url %>" 
 } 
 
 /* The host section describes attributes of the host, like the location */ 
 host { 
-  location = "IKW" 
+  location = "" 
 } 
 
 /* Feel free to specify as many udp_send_channels as you like.  Gmond 

@@ -1,0 +1,16 @@
+# $Id$
+
+Writtenby: udo.waechter@uni-osnabrueck.de
+License: GPL
+
+== Module: ganglia
+Manage a ganglia infrastructure, including meta-daemons and monitor daemons.
+
+== Notice:
+In order to use this module two global variables should exist:
+* +$company+ - A descriptive string of your company
+* +$documentations_url+  - A url where people can find the company's website.
+* +$network_location+ - Geographical location of your network.
+
+
+

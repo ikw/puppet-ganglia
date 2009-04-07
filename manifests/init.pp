@@ -14,6 +14,28 @@ $service = $kernel ? {
     default => "ganglia-monitor",
 }
 
+# _Define:_ ganglia::gmetric::python
+# Manage a ganglia python metric (also known module).
+# 
+# _Parameters:_
+#   $namevar   
+#   - The metric's name
+#   $source = "puppet:///ganglia/metrics-py/${namevar}.py"
+#   - The source from where to get the metric. 
+#  $additional_lib = ""
+#   - additional library needed by this module
+# $additional_lib_source = "ganglia/metrics-py"
+# - from where to get the addtional library
+#   $ensure = "present"
+#   - {"present","absent"} whether or not this process should be monitored
+#
+# _Sample Usage:_
+# 1. +ganglia::gmetric::python{"mysql":
+#         additional_lib => "DBUtil.py",
+#       }+
+#       - installs the mysql.py module and its requirement DBUtil.py from
+#         puppet:///ganglia/metrics-py/
+#
 define ganglia::gmetric::python(
     $source="",
     $ensure="present",
@@ -41,29 +63,51 @@ define ganglia::gmetric::python(
   }
   file{"${ganglia_metrics_py}/${name}.py":
     source => "puppet:///${source_real}",
-	   ensure => $ensure,
-	   require => File["${ganglia_metrics_py}"],
-	   notify => Service["${service}"],
+           ensure => $ensure,
+           require => File["${ganglia_metrics_py}"],
+           notify => Service["${service}"],
   }
   file{"${ganglia_mconf_dir}/conf.d/${name}.pyconf":
     source => "puppet:///${source_real}conf",
-	   require => [ File["${ganglia_metrics_py}/${name}.py"], File["${ganglia_mconf_dir}/conf.d"] ],
-	   ensure => $ensure,
+           require => [ File["${ganglia_metrics_py}/${name}.py"], File["${ganglia_mconf_dir}/conf.d"] ],
+           ensure => $ensure,
   }
   case $additional_lib {
     "": {
       debug("no additional libraries.")
     }
     default: {
-	       file{"${ganglia_metrics_py}/${additional_lib}}":
-		 source => "puppet:///${additional_lib_source}/${additional_lib}",
-			ensure => $ensure,              
-			notify => Service["${service}"],
-	       }
-	     }
+               file{"${ganglia_metrics_py}/${additional_lib}}":
+                 source => "puppet:///${additional_lib_source}/${additional_lib}",
+                        ensure => $ensure,              
+                        notify => Service["${service}"],
+               }
+             }
   }
 }
-
+# _Define:_ ganglia::gmetric::cron
+# Manage a ganglia metric called via cron.
+# 
+# _Parameters:_
+#   $namevar   
+#   - The metric's name
+#   $source = "puppet:///ganglia/metrics-cron/${namevar}"
+#   - The source from where to get the metric. 
+#   $runwhen = "1"
+#   - At which points in time this metric should be run [1,5,15,30,60]
+#   $ensure = "present"
+#   - {"present","absent"} whether or not this process should be monitored
+#
+# _Sample Usage:_
+# 1. +ganglia::gmetric::cron{"smartctl": }+
+#       - fetches smartctl and installs it in the ganglia::monitor.
+#         This metric is then run every minute
+#
+# 1. +ganglia::gmetric::cron{"workusage": 
+#               runwhen => "60",
+#       }+
+#       - install a metric 'workusage' and run it every 60 minutes.
+#
 define ganglia::gmetric::cron(
     $source="",
     $ensure="present",
@@ -79,8 +123,8 @@ define ganglia::gmetric::cron(
       debug("running every \"${runwhen}\" minutes")
     }
     default:{
-	      err("runwhen can be only one of: 1,5,15,30,60") 
-	    }
+              err("runwhen can be only one of: 1,5,15,30,60") 
+            }
   }
   if defined(File["${ganglia_metrics_cron}"]){
     debug("already defined.") 
@@ -97,9 +141,9 @@ define ganglia::gmetric::cron(
   }else{
     file{"${ganglia_metrics_cron}/${runwhen}":
       ensure => "directory",
-	     owner => "root",
-	     mode => 0700,
-	     require => File["${ganglia_metrics_cron}"]
+             owner => "root",
+             mode => 0700,
+             require => File["${ganglia_metrics_cron}"]
     } 
 
   }
@@ -108,19 +152,17 @@ define ganglia::gmetric::cron(
   }else{  
     cron{"ganglia-runmetrics-${runwhen}":
       require => File["${ganglia_metrics}/run-metrics.sh"],
-	      command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
-	      user => root,
-	      minute => "*/${runwhen}",
-	      hour => "*",
+              command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
+              user => root,
+              minute => "*/${runwhen}",
+              hour => "*",
     }
   }
   file{"${ganglia_metrics_cron}/${runwhen}/${name}":
     source => "puppet:///${source_real}",
-	   owner => root,
-	   mode => 0700,
-	   ensure => $ensure,
+           owner => root,
+           mode => 0700,
+           ensure => $ensure,
   }   
 }
-
-
 import "ganglia_*.pp"
