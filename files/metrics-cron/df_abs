@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# Script to monitor absolute disk usage.
+#
+
+clean_name() {
+  echo $1 $7 $2 | sed 's/[\/.-]/_/g'| awk "{ 
+  if (\$3 == \"tmpfs\")
+    n=\$1\$2
+  else
+    n=\$1
+    print n
+  }"
+}
+
+os=$(uname | tr '[:upper:]' '[:lower:]')
+
+if [ "$os" = "linux" ]; then
+  CMD=$(df -P -l -x none -x unknown -x udf -x iso9660 -x romfs -x ramfs -x proc -x sysfs -x tmpfs -x udev | sed 1d | grep -v \"//\")
+elif [ "$os" = "darwin" ]; then
+  CMD=$(df -k -T hfs,msdos,ufs,zfs,xfs,ntfs | sed 1d | grep -v \"//\")
+elif [ "$os" =  "freebsd" ]; then
+  CMD=$(df -k -t ufs,zfs,xfs,msdosfs,ntfs | sed 1d | grep -v \"//\")
+fi
+
+echo "${CMD}" | while read i; do
+  name=`clean_name $i`
+  GMETRIC='gmetric --type=uint16 --units=Kilobytes --tmax=1800'
+  VAL=$(echo $i | awk '{ print $3 }' )
+  ${GMETRIC} --name="DiskFree Absolute ${name}" --value=${VAL}
+done

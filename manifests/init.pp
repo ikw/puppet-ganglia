@@ -93,6 +93,8 @@ define ganglia::gmetric::python(
 #   - The metric's name
 #   $source = "puppet:///ganglia/metrics-cron/${namevar}"
 #   - The source from where to get the metric. 
+#   $source_name = ""
+#   - The name of the source file if it differs from ${namevar}
 #   $runwhen = "1"
 #   - At which points in time this metric should be run [1,5,15,30,60]
 #   $ensure = "present"
@@ -110,13 +112,18 @@ define ganglia::gmetric::python(
 #
 define ganglia::gmetric::cron(
     $source="",
+    $source_name = "",
     $ensure="present",
     $runwhen="1"
     )
 {
+  $sname = $source_name ? {
+  "" => "${name}",
+    default => "${source_name}"
+  }
   $source_real = $source ? {
-    "" => "ganglia/metrics-cron/${name}",
-    default => "${source}/${name}",
+    "" => "ganglia/metrics-cron/${sname}",
+    default => "${source}/${sname}",
   }
   case $runwhen {
     "1","5","15","30","60": {

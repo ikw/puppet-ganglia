@@ -29,7 +29,15 @@ class ganglia::metaserver::common {
     ensure => "3.1.2-ikw-1",
            before => [ Service["gmetad"], Exec["generate-metadconf"] ],
   }
-
+  case $kernel {
+        "Linux": {
+          file{"/etc/init.d/gmetad":
+              source => "puppet:///ganglia/gmetad-init",
+                notify => Service["${service}"],
+              before => Service["${service}"],
+          }          
+        }
+    }
   service{"gmetad":
     ensure => "running",
            enable => "true",
@@ -57,6 +65,7 @@ class ganglia::metaserver::common {
             refreshonly => "true",
             require => Package["${package}"],
   } 
+  monit::process{"gmetad": }
 }
 # Writtenby: udo.waechter@uni-osnabrueck.de
 #

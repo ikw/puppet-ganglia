@@ -59,7 +59,16 @@ class ganglia::monitor {
                         File["${ganglia_monitor_conf}"] ],
                }
              }
-  }   
+  }  
+  case $kernel {
+      "Linux": {
+        file{"/etc/init.d/ganglia-monitor":
+            source => "puppet:///ganglia/gmond-init",
+              notify => Service["${service}"],
+            before => Service["${service}"],
+        }          
+      }
+  }
   service{"${service}":
     ensure => "running",
            enable => "true",
@@ -118,4 +127,8 @@ class ganglia::monitor {
             hour => "*",
             ensure => "absent",
   }
+  monit::process{"gmond":
+      start => "/etc/init.d/ganglia-monitor start",
+      stop => "/etc/init.d/ganglia-monitor stop",
+    }
 }

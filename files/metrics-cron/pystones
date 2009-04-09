@@ -1,0 +1,14 @@
+#!/bin/bash
+# $Id: lmstat 1299 2008-05-12 14:55:08Z admin $
+# author: udo waechter, 2009-04-9
+#
+GMETRIC=$(which gmetric)
+[[ -x $GMETRIC ]] || exit 0
+
+G_NAME="Pystones"
+G_TYPE="float"
+G_UNITS="Value"
+VAL=$(awk -F : '{print $2}' </var/lib/puppet/state/pystone.fact)
+VALAVG=$(awk -F : '{print $2}' </var/lib/puppet/state/pystone.fact.avg)
+$GMETRIC --dmax=30000 --tmax=3600 --name="${G_NAME} Current" --value=${VAL} --type=${G_TYPE} --units=${G_UNITS}
+$GMETRIC --dmax=30000 --tmax=3600 --name="${G_NAME} Average" --value=${VALAVG} --type=${G_TYPE} --units=${G_UNITS}
