@@ -77,7 +77,7 @@ define ganglia::gmetric::python(
       debug("no additional libraries.")
     }
     default: {
-               file{"${ganglia_metrics_py}/${additional_lib}}":
+               file{"${ganglia_metrics_py}/${additional_lib}":
                  source => "puppet:///${additional_lib_source}/${additional_lib}",
                         ensure => $ensure,              
                         notify => Service["${service}"],
