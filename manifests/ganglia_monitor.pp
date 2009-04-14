@@ -119,16 +119,8 @@ class ganglia::monitor {
            owner => root,
            require => File["${ganglia_metrics}"],
   }
-  cron{"ganglia-runmetrics":
-    require => File["${ganglia_metrics}/run-metrics.sh"],
-            command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}",
-            user => root,
-            minute => "*",
-            hour => "*",
-            ensure => "absent",
-  }
   monit::process{"gmond":
-      start => "/etc/init.d/ganglia-monitor start",
-      stop => "/etc/init.d/ganglia-monitor stop",
-    }
+    start => "/etc/init.d/ganglia-monitor start",
+	  stop => "/etc/init.d/ganglia-monitor stop",
+  }
 }

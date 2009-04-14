@@ -63,26 +63,26 @@ define ganglia::gmetric::python(
   }
   file{"${ganglia_metrics_py}/${name}.py":
     source => "puppet:///${source_real}",
-           ensure => $ensure,
-           require => File["${ganglia_metrics_py}"],
-           notify => Service["${service}"],
+	   ensure => $ensure,
+	   require => File["${ganglia_metrics_py}"],
+	   notify => Service["${service}"],
   }
   file{"${ganglia_mconf_dir}/conf.d/${name}.pyconf":
     source => "puppet:///${source_real}conf",
-           require => [ File["${ganglia_metrics_py}/${name}.py"], File["${ganglia_mconf_dir}/conf.d"] ],
-           ensure => $ensure,
+	   require => [ File["${ganglia_metrics_py}/${name}.py"], File["${ganglia_mconf_dir}/conf.d"] ],
+	   ensure => $ensure,
   }
   case $additional_lib {
     "": {
       debug("no additional libraries.")
     }
     default: {
-               file{"${ganglia_metrics_py}/${additional_lib}":
-                 source => "puppet:///${additional_lib_source}/${additional_lib}",
-                        ensure => $ensure,              
-                        notify => Service["${service}"],
-               }
-             }
+	       file{"${ganglia_metrics_py}/${additional_lib}":
+		 source => "puppet:///${additional_lib_source}/${additional_lib}",
+			ensure => $ensure,              
+			notify => Service["${service}"],
+	       }
+	     }
   }
 }
 # _Define:_ ganglia::gmetric::cron
@@ -118,7 +118,7 @@ define ganglia::gmetric::cron(
     )
 {
   $sname = $source_name ? {
-  "" => "${name}",
+    "" => "${name}",
     default => "${source_name}"
   }
   $source_real = $source ? {
@@ -130,17 +130,17 @@ define ganglia::gmetric::cron(
       debug("running every \"${runwhen}\" minutes")
     }
     default:{
-              err("runwhen can be only one of: 1,5,15,30,60") 
-            }
+	      err("runwhen can be only one of: 1,5,15,30,60") 
+	    }
   }
   if defined(File["${ganglia_metrics_cron}"]){
     debug("already defined.") 
   }else{
     file{"${ganglia_metrics_cron}":
       ensure => "directory",
-      owner => "root",
-      mode => 0700,
-      require => File["${ganglia_metrics}"],
+	     owner => "root",
+	     mode => 0700,
+	     require => File["${ganglia_metrics}"],
     }
   }
   if defined(File["${ganglia_metrics_cron}/${runwhen}"]){
@@ -148,9 +148,9 @@ define ganglia::gmetric::cron(
   }else{
     file{"${ganglia_metrics_cron}/${runwhen}":
       ensure => "directory",
-             owner => "root",
-             mode => 0700,
-             require => File["${ganglia_metrics_cron}"]
+	     owner => "root",
+	     mode => 0700,
+	     require => File["${ganglia_metrics_cron}"]
     } 
 
   }
@@ -159,17 +159,16 @@ define ganglia::gmetric::cron(
   }else{  
     cron{"ganglia-runmetrics-${runwhen}":
       require => File["${ganglia_metrics}/run-metrics.sh"],
-              command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
-              user => root,
-              minute => "*/${runwhen}",
-              hour => "*",
+	      command => "${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
+	      user => root,
+	      minute => "*/${runwhen}",
     }
   }
   file{"${ganglia_metrics_cron}/${runwhen}/${name}":
     source => "puppet:///${source_real}",
-           owner => root,
-           mode => 0700,
-           ensure => $ensure,
+	   owner => root,
+	   mode => 0700,
+	   ensure => $ensure,
   }   
 }
 import "ganglia_*.pp"
