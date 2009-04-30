@@ -53,7 +53,7 @@ gridname <%= ganglia_gridname %>
 # If you want any host which connects to the gmetad XML to receive
 # data, then set this value to "on"
 # default: off
-# all_trusted on
+all_trusted on
 #
 #-------------------------------------------------------------------------------
 # If you don't want gmetad to setuid then set this to off
@@ -79,7 +79,7 @@ setuid_username "ganglia"
 #-------------------------------------------------------------------------------
 # The number of threads answering XML requests
 # default: 4
-# server_threads 10
+server_threads 5
 #
 #-------------------------------------------------------------------------------
 # Where gmetad stores its round-robin databases
