@@ -33,7 +33,6 @@ host {
    used to only support having a single channel */ 
 udp_send_channel { 
   mcast_join = <%= ganglia_mcast_join %> 
-  /* bind = <%= ipaddress %> */
   port = <%= ganglia_mcast_port %> 
   ttl = 1 
 } 
@@ -48,7 +47,8 @@ udp_recv_channel {
 /* You can specify as many tcp_accept_channels as you like to share 
    an xml description of the state of the cluster */ 
 tcp_accept_channel { 
-  port = 8649 
+  port = <%= ganglia_xml_port %>
+  bind = <%= ipaddress %>
 } 
 
 
