@@ -7,5 +7,5 @@
 #
 ## run gmetrics from directory $1
 for I in $(ls $1/* 2>/dev/null); do
-	[[ -x $I ]] && $I
+	[[ -x $I ]] && $I 2>/dev/null
 done

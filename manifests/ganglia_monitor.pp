@@ -19,6 +19,10 @@
 #   +include ganglia::monitor+
 #
 class ganglia::monitor {
+    $presence = $present ? {
+      "absent" => "absent",
+        default => "present"
+    }
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
@@ -36,8 +40,12 @@ class ganglia::monitor {
   }
   case $kernel {
     "Linux": {
+        $pack_present = $presence ? {
+          "absent" => "absent",
+            default => "3.1.2-ikw-1"
+        }
       package{["libganglia1", "${package}"]:
-        ensure => "3.1.2-ikw-1",
+        ensure => $pack_present,
                before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
       }      
     }
@@ -47,16 +55,18 @@ class ganglia::monitor {
       }
       file{"/Library/LaunchDaemons/${service}.plist":
         content => template("ganglia/${service}.plist.erb"),
-                require => Pkg_deploy["${package}"],            
+                require => Pkg_deploy["${package}"],
       }      
       darwin_firewall{"any":
         port => "8649",
+      ensure => $presence,
       }
     }
     default: {
                package{"${package}":
                  before => [ Service["${service}"], 
                         File["${ganglia_monitor_conf}"] ],
+                 ensure => $presence,
                }
              }
   }  
@@ -69,9 +79,17 @@ class ganglia::monitor {
         }          
       }
   }
+  $running = $presence ? {
+    "absent" => "stopped",
+      default => "running"
+  }
+  $enabled = $presence ? {
+    "absent" => "false",
+      default => "true"
+  }
   service{"${service}":
-    ensure => "running",
-           enable => "true",
+    ensure => "${running}",
+           enable => "${enabled}",
            pattern => "gmond",
            subscribe => File["${ganglia_monitor_conf}"],
            require => $kernel ? {
@@ -102,9 +120,10 @@ class ganglia::monitor {
   }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
     tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
-        ensure => "present",
+        ensure => $presence,
         notify => Exec["generate-metadconf"],
         content => template("ganglia/ganglia-datasource-cluster.erb"),
+        
   }   
 
 # metrics configuration
@@ -122,5 +141,11 @@ class ganglia::monitor {
   monit::process{"gmond":
     start => "/etc/init.d/ganglia-monitor start",
 	  stop => "/etc/init.d/ganglia-monitor stop",
+    ensure => $presence,
   }
+}
+
+class ganglia::monitor::none {
+  $present = "absent"
+  include ganglia::monitor 
 }
