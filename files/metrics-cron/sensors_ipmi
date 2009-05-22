@@ -1,0 +1,25 @@
+#!/usr/bin/ruby
+
+readings = %x{ipmitool sensor 2>/dev/null}
+#readings = File.open("sensread.txt").read
+hsh = {}
+
+readings.each{ |line|
+  l = line.chomp.split('|')
+  l.each_index { |index|
+    l[index].rstrip!
+    l[index].lstrip!
+  }
+  idx= l[0]
+  hsh[idx] = l[1,line.length-1]
+}
+result={}
+hsh.each_key { |key|
+  unless  hsh[key][0].eql?("na") or hsh[key][2].eql?("nr") or hsh[key][1].eql?("discrete") 
+    result[key] = hsh[key]
+  end
+}
+result.each_key { |key|
+  key2 = key.gsub(/\//,'_')
+  %x{gmetric --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300}
+}
