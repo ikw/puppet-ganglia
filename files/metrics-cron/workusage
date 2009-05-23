@@ -12,22 +12,21 @@ gmetric=%x{which gmetric}.chomp
 
 statefile="/var/tmp/workusage.state"
 
-
-contents=Dir.glob("#{work}/??*")
-owners={}
-contents.each { |dir|
-  if File.directory?(dir)
-    uid=File.stat(dir).uid
-    username=Etc.getpwuid(uid).name
-    if !owners.key?(username)
-      owners[username] = []  
-    end
-    owners[username].push(dir)
-  end
-}
-
 #Create or update (every 10 hours) the file 
-if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (Time.new.strftime("%H").to_i - 10))
+if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (Time.new.strftime("%H").to_i - 10)) || File.size(statefile) == 0
+  contents=Dir.glob("#{work}/??*")
+  owners={}
+  contents.each { |dir|
+    if File.directory?(dir)
+      uid=File.stat(dir).uid
+      username=Etc.getpwuid(uid).name
+      if !owners.key?(username)
+	owners[username] = []  
+      end
+      owners[username].push(dir)
+    end
+  }
+
   stats = File.new(statefile,"w")
   owners.keys.each { |username|
     size = 0
@@ -40,7 +39,7 @@ if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (T
   stats.close
 else
   File.new(statefile,"r").each { |line| 
-     keyval = line.split(" ")  
+    keyval = line.split(" ")  
     %x{gmetric --dmax=30000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
   }
 end
