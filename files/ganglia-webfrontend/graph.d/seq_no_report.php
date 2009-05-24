@@ -52,8 +52,8 @@ function graph_seq_no_report ( &$rrdtool_graph ) {
       $series .= get_pred($hname,$color,$hlabel);
     }
   }
-  $time= time();
-  $series .= "VRULE:${time}#FF00ff:\"\tNow\" ";
+  
+  $series .= get_time_vrule(time());
   $rrdtool_graph['series'] = $series." ".$lseries;
   return $rrdtool_graph;
 

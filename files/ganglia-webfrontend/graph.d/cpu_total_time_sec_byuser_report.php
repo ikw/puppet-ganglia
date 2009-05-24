@@ -62,8 +62,7 @@ function graph_cpu_total_time_sec_byuser_report(& $rrdtool_graph) {
       $label= str_pad($user, $labellen);
       $pseries .= get_pred($user, $color, $label);
    }
-   $time= time();
-   $lseries .= "VRULE:${time}#FF0000:\"\tNow\" ";
+   $lseries .= get_time_vrule(time());
    $rrdtool_graph['series']= $series." ".$pseries." ".$lseries;
    return $rrdtool_graph;
 

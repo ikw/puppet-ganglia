@@ -29,9 +29,7 @@ function graph_load_report(& $rrdtool_graph) {
    foreach($labels as $label) {
       $llen= strlen($label) > $llen ? strlen($label) : $llen;
    }
-   $label= str_pad($labels[0], $llen);
-   $series .= get_pred("load_five", $load_one_color, "${label}", "AREA");
-
+   
    if($context != 'host') {
       $series .= "DEF:'num_nodes'='${rrd_dir}/cpu_num.rrd':'num':AVERAGE ";
       $label= str_pad($labels[1], $llen);
@@ -40,9 +38,11 @@ function graph_load_report(& $rrdtool_graph) {
    $label= str_pad($labels[2], $llen);
    $series .= get_pred("cpu_num", $cpu_num_color, "${label}");
    $label= str_pad($labels[3], $llen);
-   $series .= get_pred("proc_run", $proc_run_color, "${label}");
-   $time= time();
-   $series .= "VRULE:${time}#FF0000:\"\tNow\" ";
+   $series .= get_pred("proc_run", $proc_run_color, "${label}","AREA");
+   $label= str_pad($labels[0], $llen);
+   $series .= get_pred("load_five", $load_one_color, "${label}", "AREA");
+   
+   $series .= get_time_vrule(time());
 
    $rrdtool_graph['series']= $series;
 

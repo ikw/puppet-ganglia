@@ -76,7 +76,7 @@ $cpu_user_color = "3333bb";
 $cpu_nice_color = "ffea00";
 $cpu_system_color = "dd0000";
 $cpu_wio_color = "ff8a60";
-$cpu_idle_color = "e2e2f2";
+$cpu_idle_color = "888888";
 
 #
 # Colors for the MEMORY report graph
@@ -135,7 +135,7 @@ $strip_domainname = true;
 #
 # Optional summary graphs
 #
-$optional_graphs = array('diskfree','seq_no', 'pystones', 'workusage','cpu_total_time_sec_byuser' );
+$optional_graphs = array('cpu_total_time_sec_byuser','diskfree', 'workusage','seq_no', 'pystones' );
 
 # 
 # Time ranges

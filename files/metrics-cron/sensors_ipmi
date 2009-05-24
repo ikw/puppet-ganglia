@@ -21,5 +21,5 @@ hsh.each_key { |key|
 }
 result.each_key { |key|
   key2 = key.gsub(/\//,'_')
-  %x{gmetric --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300}
+  %x{gmetric --dmax=3600 --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300}
 }

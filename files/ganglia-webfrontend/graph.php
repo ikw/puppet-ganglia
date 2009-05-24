@@ -140,9 +140,11 @@ if ($sourcetime)
       # Get_context makes start negative.
       $start = $sourcetime + $start;
    }
+
+// UDO: This fix broke things...
 # Fix from Phil Radden, but step is not always 15 anymore.
-if ($range=="month")
-   $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
+//if ($range=="month")
+//   $rrdtool_graph['end'] = floor($rrdtool_graph['end'] / 672) * 672;
 
 # Tidy up the title a bit
 switch ($context) {

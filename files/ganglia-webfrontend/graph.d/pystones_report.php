@@ -34,19 +34,29 @@ function graph_pystones_report ( &$rrdtool_graph ) {
   $rrdtool_graph['vertical-label'] = 'Pystones';
   $rrdtool_graph['extras']         = '--rigid';
   $bdir = dirname($rrd_dir);
-  foreach (glob("$bdir/*Uni*") as $rrd){
-    $fqdn = basename($rrd);
+  $fprefix="Pystones Current";
+  
+  if($context != 'host')
+      $files= glob("$bdir/*Uni*/${fprefix}*.rrd");
+   else
+      $files= glob("$rrd_dir/${fprefix}*.rrd");
+   $labellen= 0;
+   foreach ($files as $rrd){
+    $fqdn = basename(dirname($rrd));
     $hname = strip_domainname($fqdn);
-    $fname = "${rrd}/Pystones Current.rrd";
+    $labellen = strlen($hname) > $labellen ? strlen($hname) : $labellen;
+   }
+  foreach ($files as $rrd){
+    $fqdn = basename(dirname($rrd));
+    $hname = strip_domainname($fqdn);
     $color = get_color($hname);
-    if(is_file($fname)){
-      $series .= "DEF:${hname}='${fname}':sum:AVERAGE ";
-      $lseries .= get_pred($hname,$color,$hname);
-      #$lseries  .= "LINE2:${hname}#${color}:${hname} ";
+    if(is_file($rrd)){
+      $series .= "DEF:${hname}='${rrd}':sum:AVERAGE ";
+      $lseries .= get_pred($hname,$color,str_pad($hname,$labellen));
     }
   }
-  $time= time();
-  $series .= "VRULE:${time}#FF00ff:\"\tNow\" ";
+  
+ $lseries .= get_time_vrule(time());
   $rrdtool_graph['series'] = $series." ".$lseries;
   return $rrdtool_graph;
 

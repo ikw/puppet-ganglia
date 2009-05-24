@@ -116,6 +116,10 @@ function toggleLayer( whichLayer )
 <IMG BORDER=0 ALT="{cluster_url} CPUTOTALTIME"
    SRC="./graph.php?g=cpu_total_time_sec_byuser_report&z=medium&c={cluster_url}&{graphargs}">
 </A>
+<A HREF="./graph.php?g=diskfree_report&z=large&c={cluster_url}&{graphargs}">
+<IMG BORDER=0 ALT="{cluster_url} DISKFREE"
+   SRC="./graph.php?g=diskfree_report&z=medium&c={cluster_url}&{graphargs}">
+</A>
 <A HREF="./graph.php?g=workusage_report&z=large&c={cluster_url}&{graphargs}">
 <IMG BORDER=0 ALT="{cluster_url} WORKUSAGE"
    SRC="./graph.php?g=workusage_report&z=medium&c={cluster_url}&{graphargs}">

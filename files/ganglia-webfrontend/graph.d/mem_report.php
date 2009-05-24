@@ -30,22 +30,22 @@ function graph_mem_report(& $rrdtool_graph) {
    "DEF:'mem_buffers'='${rrd_dir}/mem_buffers.rrd':'sum':AVERAGE ".
    "CDEF:'bmem_buffers'=mem_buffers,1024,* ".
    "CDEF:'bmem_used'='bmem_total','bmem_shared',-,'bmem_free',-,'bmem_cached',-,'bmem_buffers',- ";
-   $series .= get_pred('bmem_used', "${mem_used_color}", str_pad('Used', 9),"AREA");
-   $series .= get_pred('bmem_shared', "${mem_shared_color}", str_pad('Shared', 9), "STACK");
-   $series .= get_pred('bmem_cached', "${mem_cached_color}", str_pad('Cached', 9), "STACK");
-   $series .= get_pred('bmem_buffers', "${mem_buffered_color}", str_pad('Buffered', 9), "STACK");
+   $series .= get_pred('bmem_used', $mem_used_color, str_pad('Used', 9),"AREA");
+   $series .= get_pred('bmem_shared', $mem_shared_color, str_pad('Shared', 9),"AREA");
+   $series .= get_pred('bmem_cached', $mem_cached_color, str_pad('Cached', 9),"AREA");
+   $series .= get_pred('bmem_buffers', $mem_buffered_color, str_pad('Buffered',9),"AREA");
 
    if(file_exists("$rrd_dir/swap_total.rrd")) {
       $series .= "DEF:'swap_total'='${rrd_dir}/swap_total.rrd':'sum':AVERAGE ".
       "DEF:'swap_free'='${rrd_dir}/swap_free.rrd':'sum':AVERAGE ".
       "CDEF:'bmem_swapped'='swap_total','swap_free',-,1024,* ";
-      $series .= get_pred('bmem_swapped', $mem_swapped_color, str_pad('Swapped',9),"STACK");
+      $series .= get_pred('bmem_swapped', "${mem_swapped_color}", str_pad('Swapped',9),"AREA");
    }
 
    $series .= "LINE2:'bmem_total'#$cpu_num_color:'Total In-Core Memory' ";
    $series .= "GPRINT:'bmem_total':AVERAGE:'%6.2lf%s' ";
-   $time = time();
-   $series .= "VRULE:${time}#FF0000:\"\tNow\" ";
+   
+   $series .= get_time_vrule(time());
    $rrdtool_graph['series']= $series;
    return $rrdtool_graph;
 

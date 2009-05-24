@@ -25,7 +25,7 @@ fi
 
 echo "${CMD}" | while read i; do
   name=`clean_name $i`
-  GMETRIC='gmetric --type=uint16 --units=Kilobytes --tmax=1800'
+  GMETRIC='gmetric --type=uint16 --units=Kilobytes --dmax=3600 --tmax=1800'
   VAL=$(echo $i | awk '{ print $3 }' )
   ${GMETRIC} --name="DiskUsed Absolute ${name}" --value=${VAL}
 done

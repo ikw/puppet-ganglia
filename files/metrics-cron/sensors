@@ -16,7 +16,7 @@ yml.keys.each { |key|
 	if defined? yml[key].keys
 	yml[key].keys.each{ |k|
 	  if k =~ /input$/
-		%x{gmetric --name="Sensors #{key}" --value="#{yml[key][k]}" --type=float --tmax=300}
+		%x{gmetric --dmax=3600 --name="Sensors #{key}" --value="#{yml[key][k]}" --type=float --tmax=300}
 	  end
 	}
 	end

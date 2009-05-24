@@ -3,10 +3,17 @@
 # created by udo.waechter@uni-osnabrueck.de, 2009-02-16
 #
 require 'etc'
+require 'fileutils'
 # monitory diskusage on /work partition
 work="/work"
 #if the direcotry does not exist, do nothing
 exit 0 unless File.exist?(work)
+pidfile="/var/run/workusage.pid"
+if File.exist?(pidfile)
+    pid = File.read(pidfile).chomp
+    exit 0 if %x{ps -p #{pid} |tail -1}.chomp =~ /workusage/
+end
+File.open(pidfile,"w").write(Process.pid)
 
 gmetric=%x{which gmetric}.chomp
 
@@ -34,12 +41,15 @@ if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (T
       s = %x{du -s "#{dir}" |cut -f 1}.chomp
       size +=  s.to_f
     }
-    %x{gmetric --dmax=30000 --tmax=3600 --units="Kilobytes" --name=workusage_#{username} --value=#{size} --type="float"}
+    stats.write("#{username} #{size}\n")
+    %x{gmetric --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{username} --value=#{size} --type="float"}
   }
   stats.close
 else
   File.new(statefile,"r").each { |line| 
     keyval = line.split(" ")  
-    %x{gmetric --dmax=30000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
+    %x{gmetric --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
   }
 end
+#remove the pidfile
+FileUtils.rm(pidfile)

@@ -21,13 +21,37 @@ function get_color($string) {
    return substr(md5($string), 0, 6);
 }
 
-function get_pred($var, $color, $label,$graphtype="LINE2") {
+function get_pred($var, $color, $label, $graphtype= "LINE2") {
+   $graphline = "${graphtype}:${var}#${color}:\"${label}\"";
+   
+   if($graphtype == "AREA" || $graphtype == "STACK"){
+      $graphline = "CDEF:${var}_by_16=${var},16,/  " .
+                  "${graphtype}:${var}#${color}11  " .
+                  "AREA:${var}_by_16#${color}00  " .
+                  "AREA:${var}_by_16#${color}10::STACK  " .
+                  "AREA:${var}_by_16#${color}20::STACK  " .
+                  "AREA:${var}_by_16#${color}30::STACK  " .
+                  "AREA:${var}_by_16#${color}40::STACK  " .
+                  "AREA:${var}_by_16#${color}50::STACK  " .
+                  "AREA:${var}_by_16#${color}60::STACK  " .
+                  "AREA:${var}_by_16#${color}70::STACK  " .
+                  "AREA:${var}_by_16#${color}80::STACK  " .
+                  "AREA:${var}_by_16#${color}84::STACK  " .
+                  "AREA:${var}_by_16#${color}88::STACK  " .
+                  "AREA:${var}_by_16#${color}91::STACK  " .
+                  "AREA:${var}_by_16#${color}93::STACK  " .
+                  "AREA:${var}_by_16#${color}95::STACK  " .
+                  "AREA:${var}_by_16#${color}97::STACK  " .
+                  "AREA:${var}_by_16#${color}99::STACK  " .
+                  "LINE:${var}#${color}:\"${label}\" ";  
+   }
+   
    return "VDEF:${var}slope=${var},LSLSLOPE \
          VDEF:${var}lslint=${var},LSLINT \
          VDEF:${var}cor=${var},LSLCORREL \
          CDEF:${var}pred=${var},POP,${var}lslint,${var}slope,COUNT,*,+ \
          LINE2:${var}pred#${color}::dashes=2,5 \
-         ${graphtype}:${var}#${color}:\"${label}\" \
+         ${graphline} \
          GPRINT:${var}:AVERAGE:\"%6.2lf%s\" \
          GPRINT:${var}pred:AVERAGE:\"pred\: %6.2lf%s\" \
          GPRINT:${var}cor:\"corr\: %1.2lf\l\" ";
@@ -36,23 +60,31 @@ function get_pred($var, $color, $label,$graphtype="LINE2") {
 
 function get_graph_end($range) {
    $end= "";
+   
    switch($range) {
       case "day" :
          $end= '+6h';
          break;
       case "week" :
-         $end= '+2d';
+         $end= '+3d';
          break;
       case "month" :
-         $end= '+6w';
+         $end= '+2w';
          break;
       case "year" :
-         $end= '+3m';
+         $end= '+4m';
          break;
       default :
-         $end= '+1h';
+         $end= '+30m';
          break;
    }
    return $end;
 }
+
+function get_time_vrule($time= "") {
+   if (!is_int($time))
+      $time= time();
+   return "VRULE:${time}#B00CF4:\"\tNow\" ";
+}
+
 ?>

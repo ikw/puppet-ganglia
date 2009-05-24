@@ -7,13 +7,13 @@
 
 <TR>
 <TD ALIGN=left VALIGN=top>
-<table cellspacing=1 cellpadding=1 width="100%" border=0>
+<table cellspacing=1 cellpadding=1 border=0>
  <tr><td>CPUs Total:</td><td align=left><B>{cpu_num}</B></td>
- <TD align=center valign=top rowspan=6>
+ <TD align=center valign=top rowspan=6 colspan=2>
   <IMG SRC="./pie.php?{pie_args}" ALT="Pie Chart" BORDER="0">
  </TD>
  </tr> 
- <tr><td width="60%">Hosts up:</td><td align=left><B>{num_nodes}</B></td><td></td></tr>
+ <tr><td width="40%">Hosts up:</td><td align=left><B>{num_nodes}</B></td><td></td></tr>
  <tr><td>Hosts down:</td><td align=left><B>{num_dead_nodes}</B></td><td></td></tr>
  <tr><td>&nbsp;</td></tr>
  <tr><td colspan=2>Avg Load (15, 5, 1m):<br>&nbsp;&nbsp;<b>{cluster_load}</b></td><td></td></tr>
@@ -44,7 +44,7 @@
   </TD>
   </TR>
   </TABLE>
-<TABLE>
+  <TABLE>
     <TR ALIGN="LEFT">
         <!-- START BLOCK : sorted_list -->
         {metric_image}{br}
