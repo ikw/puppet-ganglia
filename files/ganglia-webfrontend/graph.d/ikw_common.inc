@@ -1,4 +1,5 @@
 <?php
+
 function rgb2html($r, $g= -1, $b= -1) {
    if(is_array($r) && sizeof($r) == 3)
       list($r, $g, $b)= $r;
@@ -17,8 +18,11 @@ function rgb2html($r, $g= -1, $b= -1) {
    return $color;
 }
 
-function get_color($string) {
-   return substr(md5($string), 0, 6);
+function get_color($string="") {
+  global $default_metric_color;
+  if ($string == "")
+    return $default_metric_color;
+  return substr(md5(ucfirst($string)), 9, 6);
 }
 
 function get_pred($var, $color, $label, $graphtype= "LINE2") {
@@ -27,7 +31,7 @@ function get_pred($var, $color, $label, $graphtype= "LINE2") {
    if($graphtype == "AREA" || $graphtype == "STACK"){
       $graphline = "CDEF:${var}_by_16=${var},16,/  " .
                   "${graphtype}:${var}#${color}11  " .
-                  "AREA:${var}_by_16#${color}00  " .
+                  "AREA:${var}_by_16#${color}05  " .
                   "AREA:${var}_by_16#${color}10::STACK  " .
                   "AREA:${var}_by_16#${color}20::STACK  " .
                   "AREA:${var}_by_16#${color}30::STACK  " .
@@ -36,13 +40,13 @@ function get_pred($var, $color, $label, $graphtype= "LINE2") {
                   "AREA:${var}_by_16#${color}60::STACK  " .
                   "AREA:${var}_by_16#${color}70::STACK  " .
                   "AREA:${var}_by_16#${color}80::STACK  " .
-                  "AREA:${var}_by_16#${color}84::STACK  " .
-                  "AREA:${var}_by_16#${color}88::STACK  " .
-                  "AREA:${var}_by_16#${color}91::STACK  " .
-                  "AREA:${var}_by_16#${color}93::STACK  " .
-                  "AREA:${var}_by_16#${color}95::STACK  " .
-                  "AREA:${var}_by_16#${color}97::STACK  " .
-                  "AREA:${var}_by_16#${color}99::STACK  " .
+                  "AREA:${var}_by_16#${color}90::STACK  " .
+                  "AREA:${var}_by_16#${color}94::STACK  " .
+                  "AREA:${var}_by_16#${color}A2::STACK  " .
+                  "AREA:${var}_by_16#${color}B8::STACK  " .
+                  "AREA:${var}_by_16#${color}E0::STACK  " .
+                  "AREA:${var}_by_16#${color}F0::STACK  " .
+                  "AREA:${var}_by_16#${color}FF::STACK  " .
                   "LINE:${var}#${color}:\"${label}\" ";  
    }
    
@@ -50,7 +54,9 @@ function get_pred($var, $color, $label, $graphtype= "LINE2") {
          VDEF:${var}lslint=${var},LSLINT \
          VDEF:${var}cor=${var},LSLCORREL \
          CDEF:${var}pred=${var},POP,${var}lslint,${var}slope,COUNT,*,+ \
-         LINE2:${var}pred#${color}::dashes=2,5 \
+	 VDEF:${var}avg=${var},AVERAGE \
+	 HRULE:${var}avg#${color}AA \
+	 LINE2:${var}pred#${color}::dashes=2,5 \
          ${graphline} \
          GPRINT:${var}:AVERAGE:\"%6.2lf%s\" \
          GPRINT:${var}pred:AVERAGE:\"pred\: %6.2lf%s\" \

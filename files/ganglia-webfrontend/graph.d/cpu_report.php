@@ -42,9 +42,10 @@ function graph_cpu_report(& $rrdtool_graph)
       "CDEF:'ccpu_system'=cpu_system,num_nodes,/ "."DEF:'cpu_idle'='${rrd_dir}/cpu_idle.rrd':'sum':AVERAGE ".
       "CDEF:'ccpu_idle'=cpu_idle,num_nodes,/ HRULE:0#ffffff00 ";
       
+      $series .= get_pred('ccpu_idle', $cpu_idle_color, str_pad('Idle',7), "STACK");
       $series .= get_pred('ccpu_user',$cpu_user_color,str_pad('User',7),"STACK");
-      $series .= get_pred('ccpu_nice', $cpu_nice_color, str_pad('Nice',7), "STACK");
       $series .= get_pred('ccpu_system', $cpu_system_color, str_pad('System',7), "STACK");
+      $series .= get_pred('ccpu_nice', $cpu_nice_color, str_pad('Nice',7), "STACK");
 
       if (file_exists("$rrd_dir/cpu_wio.rrd"))
       {
@@ -52,7 +53,6 @@ function graph_cpu_report(& $rrdtool_graph)
          "CDEF:'ccpu_wio'=cpu_wio,num_nodes,/ ";
          $series .= get_pred('ccpu_wio', $cpu_wio_color, str_pad('Wait',7), "STACK");
       }
-      $series .= get_pred('ccpu_idle', $cpu_idle_color, str_pad('Idle',7), "STACK");
 
    } else
    {

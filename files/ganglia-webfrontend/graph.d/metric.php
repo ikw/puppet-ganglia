@@ -107,7 +107,7 @@ function graph_metric(& $rrdtool_graph)
    }
    //# the actual graph...
    $series = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
-   $series .= get_pred('sum', $default_metric_color, $subtitle_one, "AREA");
+   $series .= get_pred('sum', get_color($rrdtool_graph["vertical-label"]), $subtitle_one, "AREA");
    //$series .= "COMMENT:'$subtitle_two'";
 
    if ($jobstart)
