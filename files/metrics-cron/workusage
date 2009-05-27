@@ -6,21 +6,31 @@ require 'etc'
 require 'fileutils'
 # monitory diskusage on /work partition
 work="/work"
+gmetric=%x{which gmetric}.chomp
+statefile="/var/tmp/workusage.state"
 #if the direcotry does not exist, do nothing
 exit 0 unless File.exist?(work)
+update_running=false
+
 pidfile="/var/run/workusage.pid"
+
 if File.exist?(pidfile)
-    pid = File.read(pidfile).chomp
-    exit 0 if %x{ps -p #{pid} |tail -1}.chomp =~ /workusage/
+  pid = File.read(pidfile).chomp
+  if %x{ps -p #{pid} |tail -1}.chomp =~ /ruby/
+    #puts "Update process running with pid: #{pid}" 
+    update_running = true
+  end
 end
-File.open(pidfile,"w").write(Process.pid)
-
-gmetric=%x{which gmetric}.chomp
-
-statefile="/var/tmp/workusage.state"
+if ! update_running
+  #puts "updating pidfile #{pidfile} with pid: #{Process.pid}"
+  f = File.open(pidfile,"w")
+  f.write(Process.pid)
+  f.close
+end
 
 #Create or update (every 10 hours) the file 
-if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (Time.new.strftime("%H").to_i - 10)) || File.size(statefile) == 0
+if (!update_running) && ((! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (Time.new.strftime("%H").to_i - 10)) || File.size(statefile) == 0)
+  #puts "Updating state file: #{statefile}"
   contents=Dir.glob("#{work}/??*")
   owners={}
   contents.each { |dir|
@@ -42,14 +52,17 @@ if (! File.exist?(statefile)) || (File.mtime(statefile).strftime("%H").to_i < (T
       size +=  s.to_f
     }
     stats.write("#{username} #{size}\n")
-    %x{gmetric --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{username} --value=#{size} --type="float"}
+    %x{gmetric --dmax=10000 --tmax=3600 --units="Megabytes" --name=workusage_#{username} --value=#{size} --type="float"}
   }
   stats.close
 else
+  #puts "Reading state file: #{statefile}"
   File.new(statefile,"r").each { |line| 
     keyval = line.split(" ")  
     %x{gmetric --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
   }
 end
 #remove the pidfile
-FileUtils.rm(pidfile)
+if ! update_running
+  FileUtils.rm(pidfile)
+end

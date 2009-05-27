@@ -9,15 +9,16 @@ exit 0 if sensr == ""
 yml = YAML.load(%x{#{sensr} -u -A | grep :})
 
 yml.keys.each { |key|
-	next if key == ""
-	if key =~ / /
-	 key = (key.split(" "))[1]
-	end
-	if defined? yml[key].keys
-	yml[key].keys.each{ |k|
-	  if k =~ /input$/
-		%x{gmetric --dmax=3600 --name="Sensors #{key}" --value="#{yml[key][k]}" --type=float --tmax=300}
-	  end
-	}
-	end
+  next if key == ""
+  #if key =~ / /
+  # key = (key.split(" "))[1]
+  #end
+  if defined? yml[key].keys
+    yml[key].keys.each{ |k|
+      k2 = key.gsub(/\//,"_")
+      if k =~ /input$/
+		%x{gmetric --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300}
+      end
+    }
+  end
 }
