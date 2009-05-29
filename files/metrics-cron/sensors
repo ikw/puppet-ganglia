@@ -6,7 +6,7 @@ require 'yaml'
 sensr = %x{which sensors}.chomp
 exit 0 if sensr == ""
 
-yml = YAML.load(%x{#{sensr} -u -A | grep :})
+yml = YAML.load(%x{#{sensr} -u -A 2>/dev/null | grep :})
 
 yml.keys.each { |key|
   next if key == ""

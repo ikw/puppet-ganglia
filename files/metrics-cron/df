@@ -27,7 +27,7 @@ fi
 
 echo "$CMD" | while read i; do
   name=`clean_name $i`
-  GMETRIC='gmetric --type=uint16 --units=Percent --dmax=3600 --tmax=1800'
+  GMETRIC='gmetric --type=uint16 --units=% --dmax=3600 --tmax=1800'
   VAL=$(echo $i | awk '{ print $(NF-1) }' | cut -f1 -d%)
   ${GMETRIC} --name="DiskUsed Percent ${name}" --value=${VAL}
 done

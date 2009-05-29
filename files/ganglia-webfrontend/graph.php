@@ -192,7 +192,6 @@ $command = RRDTOOL . " graph - ";
 // 'extras' and 'series' values.  These two require special handling.
 // Otherwise, we just loop over them later, and tack $extras and
 // $series onto the end of the command.
-$rrdtool_graph['color'] = "CANVAS#00000077";
 foreach (array_keys ($rrdtool_graph) as $key) {
 
     if (preg_match('/extras|series/', $key))
