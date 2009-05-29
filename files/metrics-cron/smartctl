@@ -96,7 +96,7 @@ chomp $smartctl;
 $smartctl = undef unless -x $smartctl;
 
 # Still not found? Check obvious places
-my @dirs = qw(/usr/bin /usr/sbin /usr/local/bin /usr/local/sbin);
+my @dirs = qw(/usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /opt/local/bin /opt/local/sbin);
 until ($smartctl or @dirs == 0) {
 	my $dir = shift @dirs;
 	my $path = $dir.'/smartctl';
@@ -116,6 +116,10 @@ if ($^O eq 'linux') {
 		closedir(IDE);
 } elsif ($^O eq 'solaris') {
 	@drives = map { s@.*/@@ ; $_ } glob '/dev/rdsk/c*t*d*s2';
+} elsif ($^O eq 'darwin') {
+		opendir(IDE, '/dev');
+		@drives = grep /^disk[0-9]$/, readdir IDE;
+		closedir(IDE);
 }
 
 @drives = split ' ', $ENV{drives} if exists $ENV{drives};
