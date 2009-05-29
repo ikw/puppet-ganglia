@@ -1,0 +1,33 @@
+#!/bin/bash
+# -*- sh -*-
+#
+# Plugin to monitor exim queue size
+
+DIRNAME=$(dirname $0)
+SPOOLDIR="unset"
+# You cannot trust the exit status of which
+EXIM=$(which exim 2>/dev/null)
+case $EXIM:$? in
+    *:1|no*) EXIM=$(which exim4 2>/dev/null)
+esac
+case $EXIM:$? in
+    *:1|no*) EXIM=''
+esac
+
+spooldir=/var/spool/exim4
+
+GRAPHTITLE='Exim Mailqueue'
+
+SPOOLDIR=${spooldir:-unset}
+EXIM=${exim:-unset}
+QUEUEWARN=${queuewarn:-100}
+QUEUECRIT=${queuecrit:-200}
+GRAPHTITLE=${graphtitle:-$GRAPHTITLE}
+
+if [ "$SPOOLDIR" = "unset" ]
+then
+	SPOOLDIR=$( ($EXIM -bP spool_directory | awk '{ print $3 "/input" }') 2>/dev/null)
+fi
+
+VAL=$(/usr/bin/find $SPOOLDIR -iname "*-H" -print 2>/dev/null |wc -l | sed 's/ *//')
+gmetric --value=${VAL} --name="${GRAPHTITLE}" --type=uint16 --tmax=60 --dmax=3600
