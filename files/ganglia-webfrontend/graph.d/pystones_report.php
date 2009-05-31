@@ -6,16 +6,16 @@ require_once('ikw_common.inc');
 function graph_pystones_report ( &$rrdtool_graph ) {
 
   global $context,
-	 $cpu_num_color,
-	 $cpu_user_color,
-	 $hostname,
-	 $load_one_color,
-	 $num_nodes_color,
-	 $proc_run_color,
-	 $range,
-	 $rrd_dir,
-	 $size,
-	 $strip_domainname;
+     $cpu_num_color,
+     $cpu_user_color,
+     $hostname,
+     $load_one_color,
+     $num_nodes_color,
+     $proc_run_color,
+     $range,
+     $rrd_dir,
+     $size,
+     $strip_domainname;
 
   if ($strip_domainname) {
     $hostname = strip_domainname($hostname);

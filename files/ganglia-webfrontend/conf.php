@@ -135,7 +135,7 @@ $strip_domainname = true;
 #
 # Optional summary graphs
 #
-$optional_graphs = array('cpu_total_time_sec_byuser','diskfree', 'workusage','seq_no', 'pystones' );
+$optional_graphs = array('cpu_total_time_sec_byuser','diskfree', 'workusage','seq_no', 'pystones', 'xen_io' );
 
 # 
 # Time ranges
