@@ -69,9 +69,9 @@ foreach (<WHO>) {
 close (WHO);
 
 my $gmetric="gmetric --dmax=30000 --tmax=300 --type=uint8";
-exec "$gmetric --name=\"Users tty\" --value=$tty";
-exec "$gmetric --name=\"Users pty\" --value=$pty";
-exec "$gmetric --name=\"Users pts\" --value=$pts";
-exec "$gmetric --name=\"Users X11\" --value=$X";
-exec "$gmetric --name=\"Users other\" --value=$unc";
+system "$gmetric --name=\"Users tty\" --value=$tty";
+system "$gmetric --name=\"Users pty\" --value=$pty";
+system "$gmetric --name=\"Users pts\" --value=$pts";
+system "$gmetric --name=\"Users X11\" --value=$X";
+system "$gmetric --name=\"Users other\" --value=$unc";
 # vim:syntax=perl
