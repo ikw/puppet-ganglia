@@ -5,9 +5,9 @@
 
 STATEFILE="/var/tmp/packages_macports.state"
 #update if state does not exist, or if older than 7 days
-if [ ! -e ${STATEFILE} ] || [ $(stat -f %m -t %s ${STATEFILE}) -lt $(expr $(date '+%s') - 604800) ]; then
-  /opt/local/bin/port sync
-  /opt/local/bin/port list outdated >${STATEFILE}
+if [ ! -e ${STATEFILE} ] || [ $(stat -f %m -t %s ${STATEFILE}) -lt $(expr $(date '+%s') - 86400) ]; then
+  nice /opt/local/bin/port sync
+  nice /opt/local/bin/port list outdated >${STATEFILE}
 fi
 
 PKGS=$(wc -l ${STATEFILE} | awk '{print $1}')

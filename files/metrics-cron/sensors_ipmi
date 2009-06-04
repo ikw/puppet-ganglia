@@ -3,15 +3,19 @@
 readings = %x{ipmitool sensor 2>/dev/null}
 #readings = File.open("sensread.txt").read
 hsh = {}
-
+idx=0
 readings.each{ |line|
   l = line.chomp.split('|')
   l.each_index { |index|
     l[index].rstrip!
     l[index].lstrip!
   }
-  idx= l[0]
-  hsh[idx] = l[1,line.length-1]
+  label= l[0]
+  if hsh.has_key? label
+  label = "#{label}#{idx}"
+  idx=idx.succ
+  end
+  hsh[label] = l[1,line.length-1]
 }
 result={}
 hsh.each_key { |key|

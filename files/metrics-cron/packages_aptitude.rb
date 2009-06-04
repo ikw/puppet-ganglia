@@ -4,10 +4,13 @@
 
 statefile="/var/tmp/packages_aptitude.state"
 
-if (! File.exist?(statefile)) || (File.mtime(statefile).to_i < (Time.new.to_i - 172800)) || File.size(statefile) == 0
+if (! File.exist?(statefile)) || (File.mtime(statefile).to_i < (Time.new.to_i - 86400)) || File.size(statefile) == 0
   ## upgrade the statefile
 apt = %x{apt-get -u dist-upgrade --print-uris --yes -s |grep -e '^Inst' 2>/dev/null}
-  results={}
+ results={}
+%x{apt-cache policy |awk -F ',' '/c=/ {print substr($5,3)}' |sort |uniq}.lstrip.rstrip.each { |rep|
+  results[rep] = 0
+}
 apt.each_line { |line|
   match = line.chomp.match('Inst.*\(.*\/(.*)\)')
   if match.nil?
