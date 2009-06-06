@@ -106,7 +106,7 @@ class ganglia::monitor {
   } 
   $interface = $kernel ? {
     "FreeBSD" => "",
-      "Darwin" => "en0",
+      "Darwin" => "",
       default => "eth0"
   }
   file{"${ganglia_monitor_conf}":
