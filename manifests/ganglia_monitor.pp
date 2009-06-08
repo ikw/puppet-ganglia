@@ -104,11 +104,6 @@ class ganglia::monitor {
     ensure => "directory",
 	   require => File["${ganglia_mconf_dir}"]
   } 
-  $interface = $kernel ? {
-    "FreeBSD" => "",
-      "Darwin" => "",
-      default => "eth0"
-  }
   file{"${ganglia_monitor_conf}":
     content => template("ganglia/ganglia-monitor-conf.erb"),
 	    require => $kernel ? {

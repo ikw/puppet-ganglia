@@ -122,6 +122,7 @@ if ($^O eq 'linux') {
 		closedir(IDE);
 }
 
+
 @drives = split ' ', $ENV{drives} if exists $ENV{drives};
 
 # Sort list of drives

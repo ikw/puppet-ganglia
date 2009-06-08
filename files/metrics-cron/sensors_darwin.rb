@@ -11,7 +11,7 @@ if File.exist?("/usr/local/bin/tempmonitor")
       l=line.chomp.split(":")
       val = l[1].lstrip.split(" ")[0]
       key = l[0]
-      %x{gmetric --dmax=3600 --name="Sensors #{key}" --value="#{val}" --type=float --units="¼C"--tmax=300}
+      %x{gmetric --dmax=3600 --name="Sensors #{key}" --value="#{val}" --type=float --units="degrees C" --tmax=300}
   end
 end
   

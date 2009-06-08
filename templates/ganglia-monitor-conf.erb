@@ -33,8 +33,8 @@ host {
    used to only support having a single channel */ 
 udp_send_channel { 
   mcast_join = <%= ganglia_mcast_join %>
-<% if interface != "" -%>
-  mcast_if = <%= interface %>
+<% if primary_netif != "" -%>
+  mcast_if = <%= primary_netif %>
 <% end -%> 
   port = <%= ganglia_mcast_port %> 
   ttl = 1 
@@ -43,8 +43,8 @@ udp_send_channel {
 /* You can specify as many udp_recv_channels as you like as well. */ 
 udp_recv_channel { 
   mcast_join = <%= ganglia_mcast_join %>
-  <% if interface != "" -%>
-    mcast_if = <%= interface %>
+  <% if primary_netif != "" -%>
+    mcast_if = <%= primary_netif %>
   <% end -%> 
   port = <%= ganglia_mcast_port %> 
   bind = <%= ganglia_mcast_join %> 
@@ -55,8 +55,8 @@ udp_recv_channel {
 tcp_accept_channel { 
   port = <%= ganglia_xml_port %>
   bind = <%= ipaddress %>
-  <% if interface != "" -%>
-    interface = <%= interface %>
+  <% if primary_netif != "" -%>
+    interface = <%= primary_netif %>
   <% end -%>
 } 
 
