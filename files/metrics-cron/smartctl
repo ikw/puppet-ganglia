@@ -120,7 +120,13 @@ if ($^O eq 'linux') {
 		opendir(IDE, '/dev');
 		@drives = grep /^disk[0-9]$/, readdir IDE;
 		closedir(IDE);
+} elsif ($^O eq 'freebsd') {
+		opendir(IDE, '/dev');
+		@drives = grep /^ad[0-9]$/, readdir IDE;
+		closedir(IDE);
 }
+
+
 
 
 @drives = split ' ', $ENV{drives} if exists $ENV{drives};
