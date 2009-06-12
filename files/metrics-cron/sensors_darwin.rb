@@ -7,7 +7,7 @@
 #
 
 if File.exist?("/usr/local/bin/tempmonitor")
-  %x{tempmonitor -a -l |grep -v SMART}.chomp.each_line do |line|
+  %x{/usr/local/bin/tempmonitor -a -l |grep -v SMART}.chomp.each_line do |line|
       l=line.chomp.split(":")
       val = l[1].lstrip.split(" ")[0]
       key = l[0]

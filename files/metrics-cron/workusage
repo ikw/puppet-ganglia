@@ -6,7 +6,9 @@ require 'etc'
 require 'fileutils'
 # monitory diskusage on /work partition
 work="/work"
-gmetric=%x{which gmetric}.chomp
+gmetric = %x{which gmetric}.chomp
+exit 0 if $? != 0
+
 statefile="/var/tmp/workusage.state"
 #if the direcotry does not exist, do nothing
 exit 0 unless File.exist?(work)
@@ -52,14 +54,14 @@ if (!update_running) && ((! File.exist?(statefile)) || (File.mtime(statefile).st
       size +=  s.to_f
     }
     stats.write("#{username} #{size}\n")
-    %x{gmetric --dmax=10000 --tmax=3600 --units="Megabytes" --name=workusage_#{username} --value=#{size} --type="float"}
+    %x{#{gmetric} --dmax=10000 --tmax=3600 --units="Megabytes" --name=workusage_#{username} --value=#{size} --type="float"}
   }
   stats.close
 else
   #puts "Reading state file: #{statefile}"
   File.new(statefile,"r").each { |line| 
     keyval = line.split(" ")  
-    %x{gmetric --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
+    %x{#{gmetric} --dmax=10000 --tmax=3600 --units="Kilobytes" --name=workusage_#{keyval[0]} --value=#{keyval[1]} --type="float"}
   }
 end
 #remove the pidfile

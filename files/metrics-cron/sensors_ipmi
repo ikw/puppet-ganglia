@@ -1,5 +1,8 @@
 #!/usr/bin/ruby
 
+gmetric = %x{which gmetric}.chomp
+exit 0 if $? != 0
+
 readings = %x{ipmitool sensor 2>/dev/null}
 #readings = File.open("sensread.txt").read
 hsh = {}
@@ -25,5 +28,5 @@ hsh.each_key { |key|
 }
 result.each_key { |key|
   key2 = key.gsub(/\//,'_')
-  %x{gmetric --dmax=3600 --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300 }
+  %x{#{gmetric} --dmax=3600 --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300 }
 }

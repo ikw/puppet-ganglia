@@ -2,6 +2,8 @@
 #
 # Script to monitor disk usage.
 #
+GMETRIC=$(which gmetric)
+[[ $? == 0 ]] || exit 0
 
 clean_name() {
   echo $1 $7 $2 | sed 's/[\/.-]/_/g'| awk "{ 
@@ -24,10 +26,9 @@ elif [ "$os" == "freebsd" ]; then
 fi
 
 
-
+GMETRIC="${GMETRIC} --type=uint16 --units=% --dmax=3600 --tmax=1800"
 echo "$CMD" | while read i; do
   name=`clean_name $i`
-  GMETRIC='gmetric --type=uint16 --units=% --dmax=3600 --tmax=1800'
   VAL=$(echo $i | awk '{ print $(NF-1) }' | cut -f1 -d%)
   ${GMETRIC} --name="DiskUsed Percent ${name}" --value=${VAL}
 done

@@ -2,7 +2,8 @@
 #
 # Script to monitor absolute disk usage.
 #
-
+GMETRIC=$(which gmetric)
+[[ $? == 0 ]] || exit 0
 clean_name() {
   echo $1 $7 $2 | sed 's/[\/.-]/_/g'| awk "{ 
   if (\$3 == \"tmpfs\")
@@ -22,10 +23,9 @@ elif [ "$os" = "darwin" ]; then
 elif [ "$os" =  "freebsd" ]; then
   CMD=$(df -k -t ufs,zfs,xfs,msdosfs,ntfs | sed 1d | grep -v \"//\")
 fi
-
+GMETRIC="${GMETRIC} --type=uint16 --units=Kilobytes --dmax=3600 --tmax=1800"
 echo "${CMD}" | while read i; do
   name=`clean_name $i`
-  GMETRIC='gmetric --type=uint16 --units=Kilobytes --dmax=3600 --tmax=1800'
   VAL=$(echo $i | awk '{ print $3 }' )
   ${GMETRIC} --name="DiskUsed Absolute ${name}" --value=${VAL}
 done

@@ -35,6 +35,9 @@ my $statefile = "$statedir/ntp_peers.state";
 
 my %peers;
 
+chomp(my $gmetric=`which gmetric`);
+exit 0 if ($? != 0);
+
 # retrieve cached list of IPs and hostnames
 if (-f "$statefile") {
     open (IN, "$statefile") or exit 4;
@@ -86,7 +89,7 @@ if ($ARGV[0] and $ARGV[0] eq 'config') {
 # send output
 foreach my $peer (keys %peers) {
   my $value = &getpeeroffset($peer);
-  system("gmetric --name=\"NTP offset $peers{$peer}{'name'}\" --value=$value --tmax=1800 --dmax=30000 --type=int16 --units=\"Milliseconds\"");
+  system("$gmetric --name=\"NTP offset $peers{$peer}{'name'}\" --value=$value --tmax=1800 --dmax=30000 --type=int16 --units=\"Milliseconds\"");
 }
 
 # save list of peer IPs and hostnames

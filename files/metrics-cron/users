@@ -44,6 +44,8 @@ GPLv2
 
 =cut
 
+chomp(my $gmetric=`which gmetric`);
+exit 0 if ($? != 0);
 
 $tty = 0;
 $pty = 0;
@@ -68,7 +70,7 @@ foreach (<WHO>) {
 
 close (WHO);
 
-my $gmetric="gmetric --dmax=30000 --tmax=300 --type=uint8";
+my $gmetric="$gmetric --dmax=30000 --tmax=300 --type=uint8";
 system "$gmetric --name=\"Users tty\" --value=$tty";
 system "$gmetric --name=\"Users pty\" --value=$pty";
 system "$gmetric --name=\"Users pts\" --value=$pts";

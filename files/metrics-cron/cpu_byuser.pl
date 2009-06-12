@@ -3,7 +3,8 @@
 # a simple script to report some per user stats to ganglia
 # contributed by Ryan Sweet <ryan@end.org>
 #
-my $gmetric="gmetric";
+chomp(my $gmetric=`which gmetric`);
+exit 0 if ($? != 0);
 my $users,@ps; 
 
 # RS: get ps aux output and skip the first line
@@ -43,22 +44,22 @@ foreach my $line (@ps)
 foreach my $user (keys %$users)
 {
         # cpu total
-        system("gmetric -d 30000 -x 300 --name=cpu_percent_$user --value=$users->{$user}{cpu} --type=float --units=\%cpu");
+        system("$gmetric -d 30000 -x 300 --name=cpu_percent_$user --value=$users->{$user}{cpu} --type=float --units=\%cpu");
         
         # mem total (only reported on linux)
         if ( $uname =~ /Linux/ )
         {
-                system("gmetric -d 30000 -x 300 --name=mem_percent_$user --value=$users->{$user}{mem} --type=float --units=\%mem");
+                system("$gmetric -d 30000 -x 300 --name=mem_percent_$user --value=$users->{$user}{mem} --type=float --units=\%mem");
         }
         
         # vsz total
-        system("gmetric -d 30000 -x 300 --name=mem_vsz_kb_$user --value=$users->{$user}{vsz} --type=float --units=kilobytes");
+        system("$gmetric -d 30000 -x 300 --name=mem_vsz_kb_$user --value=$users->{$user}{vsz} --type=float --units=kilobytes");
 
         # cputime total
-        system("gmetric -d 30000 -x 300 --name=cpu_total_time_sec_$user --value=$users->{$user}{time} --type=float --units=seconds");
+        system("$gmetric -d 30000 -x 300 --name=cpu_total_time_sec_$user --value=$users->{$user}{time} --type=float --units=seconds");
         
         # processes total
-        system("gmetric -d 30000 -x 300 --name=procs_total_$user --value=$users->{$user}{procs} --type=float --units=processes");
+        system("$gmetric -d 30000 -x 300 --name=procs_total_$user --value=$users->{$user}{procs} --type=float --units=processes");
                         
 
 } 

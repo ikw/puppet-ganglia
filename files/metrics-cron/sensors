@@ -5,6 +5,8 @@ require 'yaml'
 
 sensr = %x{which sensors}.chomp
 exit 0 if sensr == ""
+gmetric = %x{which gmetric}.chomp
+exit 0 if $? != 0
 
 yml = YAML.load(%x{#{sensr} -u -A 2>/dev/null | grep :})
 
@@ -17,7 +19,7 @@ yml.keys.each { |key|
     yml[key].keys.each{ |k|
       k2 = key.gsub(/\//,"_")
       if k =~ /input$/
-		%x{gmetric --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300 --units="degrees C"}
+		%x{#{gmetric} --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300 --units="degrees C"}
       end
     }
   end

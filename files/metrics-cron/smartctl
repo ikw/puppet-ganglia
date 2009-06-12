@@ -79,7 +79,8 @@
 
 
 use strict;
-
+chomp(my $gmetric=`which gmetric`);
+exit 0 if ($? != 0);
 my $smartctl = exists $ENV{smartctl} ? $ENV{smartctl} : undef;
 #my $lastrun = "/var/tmp/smartctl-lastrun";
 
@@ -147,10 +148,10 @@ foreach (@drives) {
 		}
 		my $output = `$cmd`;
 		if ($output =~ /Current Drive Temperature:\s*(\d+)/) {
-			`gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$1 --type=uint8 --units="Celsius"`
+			`$gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$1 --type=uint8 --units="degrees C"`
 		} elsif ($output =~ /^(194 Temperature_Celsius.*)/m) {
 			my @F = split ' ', $1;
-			`gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$F[9] --type=uint8 --units="Celsius"`
+			`$gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$F[9] --type=uint8 --units="degrees C"`
 		}
 	}
 }
