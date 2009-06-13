@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # a simple script to report some per user stats to ganglia
 # contributed by Ryan Sweet <ryan@end.org>
@@ -10,14 +10,14 @@ my $users,@ps;
 # RS: get ps aux output and skip the first line
 # RS: ps has different behaviour on IRIX vs Linux
 my $uname=`uname`;
-if ( $uname =~ /Linux/ ) 
-{
-        @ps=`ps aux| grep -v USER`;
-}else{
-        # RS: pcpu is repeated because this ps doesn't give %mem stats
-        @ps=`ps -eo user,pid,pcpu,pcpu,vsz,rss,tty,state,stime,time,comm`;
-}
-
+#if ( $uname =~ /Linux/ ) 
+#{
+#        @ps=`ps aux| grep -v USER`;
+#}else{
+#        # RS: pcpu is repeated because this ps doesn't give %mem stats
+#        @ps=`ps -xeo user,pid,pcpu,pcpu,vsz,rss,tty,state,time,comm|grep -v USER`;
+#}
+@ps=`ps xaeo user,pcpu,pmem,vsz,rss,time|grep -v USER`;
 
 # RS: iterate over each line of the ps output
 foreach my $line (@ps) 
@@ -26,7 +26,7 @@ foreach my $line (@ps)
         $line =~ s/^\s+//;
         
         # RS: split the line on whitespace, assigning vars
-        my ($user,$pid,$cpu,$mem,$vsz,$rss,$tty,$stat,$start,$time,$command,@args) = split(/\s+/, $line);     
+        my ($user,$cpu,$mem,$vsz,$rss,$time,@args) = split(/\s+/, $line);     
 
         # RS: populate the hash %users with references to the cumulative cpu,memz,time vars
         $users->{$user}{cpu}+=$cpu;
@@ -39,27 +39,18 @@ foreach my $line (@ps)
         $users->{$user}{procs}+=1; # total number of procs per user
         
 }
-
+$gmetric="$gmetric -d 30000 -x 300 --type=float";
 # RS: for each user that was found, send the stats to gmond
 foreach my $user (keys %$users)
 {
         # cpu total
-        system("$gmetric -d 30000 -x 300 --name=cpu_percent_$user --value=$users->{$user}{cpu} --type=float --units=\%cpu");
-        
-        # mem total (only reported on linux)
-        if ( $uname =~ /Linux/ )
-        {
-                system("$gmetric -d 30000 -x 300 --name=mem_percent_$user --value=$users->{$user}{mem} --type=float --units=\%mem");
-        }
-        
+        system("$gmetric --name=cpu_percent_$user --value=$users->{$user}{cpu} --units=\%cpu");
+	# mem percent
+	system("$gmetric --name=mem_percent_$user --value=$users->{$user}{mem} --units=\%mem");
         # vsz total
-        system("$gmetric -d 30000 -x 300 --name=mem_vsz_kb_$user --value=$users->{$user}{vsz} --type=float --units=kilobytes");
-
+        system("$gmetric --name=mem_vsz_kb_$user --value=$users->{$user}{vsz} --units=kilobytes");
         # cputime total
-        system("$gmetric -d 30000 -x 300 --name=cpu_total_time_sec_$user --value=$users->{$user}{time} --type=float --units=seconds");
-        
+        system("$gmetric --name=cpu_total_time_sec_$user --value=$users->{$user}{time} --units=seconds");
         # processes total
-        system("$gmetric -d 30000 -x 300 --name=procs_total_$user --value=$users->{$user}{procs} --type=float --units=processes");
-                        
-
+        system("$gmetric --name=procs_total_$user --value=$users->{$user}{procs} --units=processes");
 } 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 # Plugin to monitor harddrive temperatures through SMART.
 #

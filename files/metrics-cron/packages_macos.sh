@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # $Id$
 #
 # Ganglia metric for softwareupdates on mac os x

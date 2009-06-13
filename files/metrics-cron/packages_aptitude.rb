@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # $Id$!
 ## monitor package upgades for aptitude
 

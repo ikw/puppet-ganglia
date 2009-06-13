@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # read sensor data from poseidon device and send it to ganglia
 #

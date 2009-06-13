@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # $Id: lmstat 1299 2008-05-12 14:55:08Z admin $
 # author: udo waechter, 2009-04-9
 #

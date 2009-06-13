@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # $Id$
 # 2009, (c) by udo.waechter@uni-osnabrueck.de
 #

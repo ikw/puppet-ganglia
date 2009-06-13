@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
