@@ -19,7 +19,14 @@ yml.keys.each { |key|
     yml[key].keys.each{ |k|
       k2 = key.gsub(/\//,"_")
       if k =~ /input$/
-		%x{#{gmetric} --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300 --units="degrees C"}
+		if k =~ /^in/
+		  units = "Volts"
+		elsif k =~ /^fan/i
+		  units = "RPM"
+		else
+		  units = "degrees C"
+		end
+		%x{#{gmetric} --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300 --units="#{units}"}
       end
     }
   end

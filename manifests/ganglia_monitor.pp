@@ -44,11 +44,16 @@ class ganglia::monitor {
 	"absent" => "absent",
 	  default => "3.1.2-ikw-1"
       }
-      package{["libganglia1", "${package}"]:
+      package{"libganglia1":
 	ensure => $pack_present,
 	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
       }      
-    }
+    package{"${package}":
+      ensure => $pack_present,
+             before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
+             require => Package["libganglia1"],
+          }
+  }      
     "Darwin": {
       pkg_deploy{"${package}": 
 	before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
