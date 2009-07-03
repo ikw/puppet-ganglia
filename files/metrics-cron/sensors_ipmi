@@ -3,7 +3,7 @@
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
 
-readings = %x{ipmitool sensor 2>/dev/null}
+readings = %x{ipmitool sdr list 2>/dev/null | grep -v "Not Readable" |grep -v "0x" |grep -v disabled}
 #readings = File.open("sensread.txt").read
 hsh = {}
 idx=0
@@ -20,13 +20,11 @@ readings.each{ |line|
   end
   hsh[label] = l[1,line.length-1]
 }
-result={}
 hsh.each_key { |key|
-  unless  hsh[key][0].eql?("na") or hsh[key][2].eql?("nr") or hsh[key][1].eql?("discrete") 
-    result[key] = hsh[key]
-  end
-}
-result.each_key { |key|
   key2 = key.gsub(/\//,'_')
-  %x{#{gmetric} --dmax=3600 --name="Sensors #{key2}" --value=#{result[key][0]} --units="#{result[key][1]}" --type=float --tmax=300 }
+	puts ">>#{hsh[key][0]}<<"
+  value = hsh[key][0].gsub(/^([0-9\.-]+)\s.*/, '\1')
+  units = hsh[key][0].gsub(/^([0-9\.-]+)\s+(.*)/, '\2')
+  puts "#{gmetric} --dmax=3600 --name=\"Sensors #{key2}\" --value=#{value} --units=\"#{units}\" --type=float --tmax=300"
+#   %x{#{gmetric} --dmax=3600 --name="Sensors #{key2}" --value=#{value} --units="#{units}" --type=float --tmax=300 }
 }
