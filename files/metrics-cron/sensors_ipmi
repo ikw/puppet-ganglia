@@ -22,9 +22,9 @@ readings.each{ |line|
 }
 hsh.each_key { |key|
   key2 = key.gsub(/\//,'_')
-	puts ">>#{hsh[key][0]}<<"
+    #puts ">>#{hsh[key][0]}<<"
   value = hsh[key][0].gsub(/^([0-9\.-]+)\s.*/, '\1')
   units = hsh[key][0].gsub(/^([0-9\.-]+)\s+(.*)/, '\2')
-  puts "#{gmetric} --dmax=3600 --name=\"Sensors #{key2}\" --value=#{value} --units=\"#{units}\" --type=float --tmax=300"
-#   %x{#{gmetric} --dmax=3600 --name="Sensors #{key2}" --value=#{value} --units="#{units}" --type=float --tmax=300 }
+  #puts "#{gmetric} --dmax=3600 --name=\"Sensors #{key2}\" --value=#{value} --units=\"#{units}\" --type=float --tmax=300"
+  %x{#{gmetric} --dmax=3600 --name="Sensors #{key2}" --value=#{value} --units="#{units}" --type=float --tmax=300 }
 }
