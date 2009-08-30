@@ -79,9 +79,12 @@ setuid_username "ganglia"
 #-------------------------------------------------------------------------------
 # The number of threads answering XML requests
 # default: 4
-server_threads 5
+server_threads 4
 #
 #-------------------------------------------------------------------------------
 # Where gmetad stores its round-robin databases
 # default: "/var/lib/ganglia/rrds"
-# rrd_rootdir "/some/other/place"
+<% if scope.lookupvar("ganglia_tmpfs") != "" and scope.lookupvar("ganglia_tmpfs") != "/var/lib/ganglia/rrds"-%>
+rrd_rootdir <%= scope.lookupvar("ganglia_tmpfs") %>/rrds
+<% end -%>
+

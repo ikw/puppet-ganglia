@@ -30,7 +30,7 @@ function graph_diskfree_report(& $rrdtool_graph)
       $rrdtool_graph['title'] = "$hostname $title last $range";
    //  This will be turned into:   
    //  "Clustername $TITLE last $timerange", so keep it short
-   $rrdtool_graph['vertical-label'] = 'Percent Free Space';
+   $rrdtool_graph['vertical-label'] = '% used';
    $rrdtool_graph['upper-limit'] = '100';
    $rrdtool_graph['lower-limit'] = '0';
    $rrdtool_graph['extras'] = '--rigid';

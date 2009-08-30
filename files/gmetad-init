@@ -10,23 +10,38 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/gmetad
 NAME=gmetad
 DESC="Ganglia Monitor Meta-Daemon"
-
+TMPFS=/mnt/ganglia/rrds
 test -x $DAEMON || exit 0
 
 set -e
 
 case "$1" in
   start)
+    # restore from disk to tmpfs if necessary
+      if [ "$TMPFS" -a -d $TMPFS/../ -a ! -d $TMPFS ]; then
+          echo -n "Restoring $TMPFS from /var/lib/ganglia/rrds..."
+          rsync -aczH /var/lib/ganglia/rrds/ $TMPFS
+         chown -R ganglia:ganglia $TMPFS
+          echo "done."
+      fi
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
 		--exec $DAEMON -- --pid-file=/var/run/$NAME.pid
 	echo "$NAME."
 	;;
   stop)
+   # back up from tmpfs to disk
+      
 	echo -n "Stopping $DESC: "
         start-stop-daemon --stop  --quiet --oknodo \
                 --exec $DAEMON  2>&1 > /dev/null 
 	echo "$NAME."
+	if [ "$TMPFS" -a -d $TMPFS/../ -a $? -eq 0 -a -d $TMPFS/__SummaryInfo__ ]; then
+          echo -n "Saving $TMPFS to /var/lib/ganglia/rrds..."
+          rsync --delete -azcH $TMPFS /var/lib/ganglia/
+          chown -R ganglia:ganglia /var/lib/ganglia
+          echo "done."
+    fi
 	;;
   reload)
   ;;

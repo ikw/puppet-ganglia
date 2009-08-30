@@ -53,6 +53,15 @@ class ganglia::monitor {
              before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
              require => Package["libganglia1"],
           }
+      package{"ganglia-module-iostat":
+      ensure => $presence,
+        notify => Service["${service}"],
+      }
+      file {"/etc/ganglia/conf.d/iostat.conf":
+        source => "puppet:///ganglia/mod_iostat.conf",
+      ensure => $presence,
+        notify => Service["${service}"],
+      }
   }      
     "Darwin": {
       pkg_deploy{"${package}": 
@@ -77,6 +86,12 @@ class ganglia::monitor {
   }  
   case $kernel {
     "Linux": {
+      nagios2_service { "${fqdn}_mem_percent_ganglia":
+              service_description => "mem_percent_ganglia",
+                check_command => "check_ganglia!mem_percent_ganglia!15!30",
+                servicegroups => "Memory",
+                notification_options => "c,u",
+            }      
       file{"/etc/init.d/ganglia-monitor":
 	source => "puppet:///ganglia/gmond-init",
 	       notify => Service["${service}"],

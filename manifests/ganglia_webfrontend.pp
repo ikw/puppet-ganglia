@@ -24,7 +24,7 @@ class ganglia::webfrontend {
     source => "puppet:///ganglia/ganglia-webfrontend",
     recurse => true,
   }
-    include ganglia::metaserver::common
+   # include ganglia::metaserver::common
     include webserver::apache2::basic
     package{["libapache2-mod-php5", "libgd2-xpm"]:
       ensure => "present",

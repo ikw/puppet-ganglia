@@ -48,8 +48,8 @@ class ganglia::metaserver::common {
         "Linux": {
           file{"/etc/init.d/gmetad":
               source => "puppet:///ganglia/gmetad-init",
-                notify => Service["${service}"],
-              before => Service["${service}"],
+                notify => Service["gmetad"],
+              before => Service["gmetad"],
 	      ensure => "${presence}",
           }          
         }
@@ -89,7 +89,7 @@ class ganglia::metaserver::common {
     command => "cat ${ganglia_metacollects}/* >${ganglia_metaconf}",
             refreshonly => "true",
             require => Package["${package}"],
-	    onlyif => "test -d ${ganglia_metaconf}",
+	    onlyif => "test -f ${ganglia_metaconf}",
   } 
   monit::process{"gmetad": ensure => "${presence}" }
 }
@@ -138,3 +138,54 @@ class ganglia::metaserver::none {
   include ganglia::metaserver::common
 
 }
+
+class ganglia::metaserver::tmpfs { 
+  $pres_real = $presence ? {
+    "absent" => "absent",
+      default => "present"
+  }
+  $ganglia_tmpfs_real= $ganglia_tmpfs ? {
+    "" => "/var/lib/ganglia/rrds",
+    default => $ganglia_tmpfs
+  }
+  include ganglia::metaserver::common
+ #collect the meta configs for this host.  
+     File <<| tag == "ganglia_metad_${hostname}" |>>
+  if $ganglia_tmpfs_real != "/var/lib/ganglia/rrds" {
+    notice("$hostname ganglia::tmpfs ensure: $pres_real, tmpfs: $ganglia_tmpfs_real")
+  cron{"ganglia-tmpfs":
+    minute => "*/30",
+      command => "if [ -d ${ganglia_tmpfs_real}/rrds/__SummaryInfo__ ]; then rsync -aczH ${ganglia_tmpfs_real}/rrds/ /var/lib/ganglia/rrds/; fi 2>&1",
+      user => "ganglia",
+  ensure => $pres_real,
+  }
+  file{"${ganglia_tmpfs_real}":
+  ensure => $pres_real ? {
+    "absent" => "absent",
+      default => "directory"
+  },
+    owner => "ganglia",
+    group => "ganglia",
+  }
+
+  mount{"${ganglia_tmpfs_real}":
+    device => "none",
+      fstype => "tmpfs",
+      
+  ensure => $pres_real ? {
+    "absent" => "absent",
+      default => "mounted"
+  },
+    dump => 0,
+    pass => 0,
+    options => "size=1024M,mode=755,uid=ganglia,gid=ganglia",
+    require => File["${ganglia_tmpfs_real}"],
+      before => Service["gmetad"],
+    }
+  }
+}
+
+  class ganglia::metaserver::tmpfs::none {
+    $presence = "absent"
+    include ganglia::metaserver::tmpfs::none
+  }
