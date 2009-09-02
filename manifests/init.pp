@@ -111,20 +111,26 @@ define ganglia::gmetric::python(
 #       - install a metric 'workusage' and run it every 60 minutes.
 #
 define ganglia::gmetric::cron(
+    $metric_name="",
     $source="",
     $source_name = "",
     $ensure="present",
     $runwhen="1"
     )
 {
+  $name_real = $metric_name ? {
+     "" => $name,
+       default => $metric_name
+   }  
   $sname = $source_name ? {
-    "" => "${name}",
+    "" => "${name_real}",
     default => "${source_name}"
   }
   $source_real = $source ? {
     "" => "ganglia/metrics-cron/${sname}",
     default => "${source}/${sname}",
   }
+ 
   case $runwhen {
     "1","5","15","30","60": {
       debug("running every \"${runwhen}\" minutes")
@@ -164,7 +170,7 @@ define ganglia::gmetric::cron(
 	      minute => "*/${runwhen}",
     }
   }
-  file{"${ganglia_metrics_cron}/${runwhen}/${name}":
+  file{"${ganglia_metrics_cron}/${runwhen}/${name_real}":
     source => "puppet:///${source_real}",
 	   owner => root,
 	   mode => 0700,
