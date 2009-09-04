@@ -91,6 +91,10 @@ class ganglia::monitor {
                 check_command => "check_ganglia!mem_percent_ganglia!15!30",
                 servicegroups => "Memory",
                 notification_options => "c,u",
+      ensure => defined(Class["Ganglia::Monitor::None"]) ? {
+        true => "absent",
+          default => $presence
+      },
             }      
       file{"/etc/init.d/ganglia-monitor":
 	source => "puppet:///ganglia/gmond-init",
