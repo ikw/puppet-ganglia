@@ -88,7 +88,7 @@ class ganglia::monitor {
     "Linux": {
       nagios2_service { "${fqdn}_mem_percent_ganglia":
               service_description => "mem_percent_ganglia",
-                check_command => "check_ganglia!mem_percent_ganglia!15!30",
+                check_command => "check_ganglia!mem_percent_ganglia!15!30!${ganglia_metaserver_ip}",
                 servicegroups => "Memory",
                 notification_options => "c,u",
       ensure => defined(Class["Ganglia::Monitor::None"]) ? {
