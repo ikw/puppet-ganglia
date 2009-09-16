@@ -44,6 +44,6 @@ foreach $domain (@stats)
 ## cpu usage
   $cpu_percent = $tmp[3];
   $vcpu        = $tmp[8];
-  $cpu = $cpu_percent/$dom0_cpus;
+  $cpu = $cpu_percent/$vcpu;
   system("gmetric --name=\"Xen CPU used $domname\" --value=$cpu --type=uint16 --units=% --tmax=300 --dmax=30000");
 }
