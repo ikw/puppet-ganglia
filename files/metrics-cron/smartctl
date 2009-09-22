@@ -84,14 +84,6 @@ exit 0 if ($? != 0);
 my $smartctl = exists $ENV{smartctl} ? $ENV{smartctl} : undef;
 #my $lastrun = "/var/tmp/smartctl-lastrun";
 
-#if (-e $lastrun) {
-#	my $mtime = (stat($lastrun))[9];
-	#exit 0 if time() < ($mtime + 300);
-#}else{
-#	`touch $lastrun`;
-#}
-# If the envvar is not set, look for smartctl
-# first, try $PATH
 $smartctl = `which smartctl` unless $smartctl;
 chomp $smartctl;
 $smartctl = undef unless -x $smartctl;
@@ -99,9 +91,9 @@ $smartctl = undef unless -x $smartctl;
 # Still not found? Check obvious places
 my @dirs = qw(/usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /opt/local/bin /opt/local/sbin);
 until ($smartctl or @dirs == 0) {
-	my $dir = shift @dirs;
-	my $path = $dir.'/smartctl';
-	$smartctl = $path if -x $path;
+  my $dir = shift @dirs;
+  my $path = $dir.'/smartctl';
+  $smartctl = $path if -x $path;
 }
 
 $ENV{LANG} = 'C';
@@ -112,47 +104,56 @@ my @drives;
 if ($^O eq 'linux') {
 # On Linux, we know how to enumerate ide drives.
 # SCSI is not as easy
-		opendir(IDE, '/dev');
-		@drives = grep /[hs]d[a-z]$/, readdir IDE;
-		closedir(IDE);
+  opendir(IDE, '/dev');
+  @drives = grep /[hs]d[a-z]$/, readdir IDE;
+  closedir(IDE);
 } elsif ($^O eq 'solaris') {
-	@drives = map { s@.*/@@ ; $_ } glob '/dev/rdsk/c*t*d*s2';
+  @drives = map { s@.*/@@ ; $_ } glob '/dev/rdsk/c*t*d*s2';
 } elsif ($^O eq 'darwin') {
-		opendir(IDE, '/dev');
-		@drives = grep /^disk[0-9]$/, readdir IDE;
-		closedir(IDE);
+  opendir(IDE, '/dev');
+  @drives = grep /^disk[0-9]$/, readdir IDE;
+  closedir(IDE);
 } elsif ($^O eq 'freebsd') {
-		opendir(IDE, '/dev');
-		@drives = grep /^ad[0-9]$/, readdir IDE;
-		closedir(IDE);
+  opendir(IDE, '/dev');
+  @drives = grep /^ad[0-9]$/, readdir IDE;
+  closedir(IDE);
 }
-
-
-
 
 @drives = split ' ', $ENV{drives} if exists $ENV{drives};
 
 # Sort list of drives
 @drives = sort @drives;
 foreach (@drives) {
-	if(system("$smartctl -c /dev/$_ 1>/dev/null") == 0){
-		my $dev;
-		$dev = $_ =~ /(.*)(?:_\d+)/ ? $1 : $_;
-		my $cmd = $smartctl.' -A ';
-		$cmd .= $ENV{'args_'.$_}.' ' if exists $ENV{'args_'.$_};
-		$cmd .= '-d '.$ENV{'type_'.$_}.' ' if exists $ENV{'type_'.$_};
-		if ($^O eq 'solaris') {
-			$cmd .= "/dev/rdsk/$dev";
-		} else {
-			$cmd .= "/dev/$dev";
-		}
-		my $output = `$cmd`;
-		if ($output =~ /Current Drive Temperature:\s*(\d+)/) {
-			`$gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$1 --type=uint8 --units="degrees C"`
-		} elsif ($output =~ /^(194 Temperature_Celsius.*)/m) {
-			my @F = split ' ', $1;
-			`$gmetric --dmax=3000 --tmax=1800 --name="HDDTemp $dev" --value=$F[9] --type=uint8 --units="degrees C"`
-		}
-	}
+  if(system("$smartctl -c /dev/$_ 1>/dev/null") == 0){
+    my $dev;
+    $dev = $_ =~ /(.*)(?:_\d+)/ ? $1 : $_;
+    my $cmd = $smartctl.' -A ';
+    $cmd .= $ENV{'args_'.$_}.' ' if exists $ENV{'args_'.$_};
+    $cmd .= '-d '.$ENV{'type_'.$_}.' ' if exists $ENV{'type_'.$_};
+    if ($^O eq 'solaris') {
+      $cmd .= "/dev/rdsk/$dev";
+    } else {
+      $cmd .= "/dev/$dev";
+    }
+    my $output = `$cmd`;
+    if ($output =~ /Current Drive Temperature:\s*(\d+)/) {
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$1 --slope=positive --type=uint8 --units="degrees C"`
+    } elsif ($output =~ /^(194 Temperature_Celsius.*)/m) {
+      my @F = split ' ', $1;
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$F[9] --slope=positive --type=uint8 --units="degrees C"`
+    }
+    if ($output =~ /^(198 Offline_Uncorrectable.*)/m) {
+      my @F = split ' ', $1;
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Offline Uncorrectable $dev" --slope=positive --value=$F[9] --type=uint8 --units="Count"`
+    }
+    if ($output =~ /^(197 Current_Pending_Sector.*)/m) {
+      my @F = split ' ', $1;
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Current Pending Sector $dev" --slope=positive --value=$F[9] --type=uint8 --units="Count"`
+    }
+    if ($output =~ /^(199 UDMA_CRC_Error_Count.*)/m) {
+      my @F = split ' ', $1;
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD UDMA CRC Error $dev" --slope=positive --value=$F[9] --type=uint32 --units="Count"`
+    }
+  }
 }
 #`touch $lastrun`
