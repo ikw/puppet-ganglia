@@ -137,22 +137,22 @@ foreach (@drives) {
     }
     my $output = `$cmd`;
     if ($output =~ /Current Drive Temperature:\s*(\d+)/) {
-      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$1 --slope=positive --type=uint8 --units="degrees C"`
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$1 --slope=positive --type=int16 --units="degrees C"`
     } elsif ($output =~ /^(194 Temperature_Celsius.*)/m) {
       my @F = split ' ', $1;
-      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$F[9] --slope=positive --type=uint8 --units="degrees C"`
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Temp $dev" --value=$F[9] --slope=positive --type=int16 --units="degrees C"`
     }
     if ($output =~ /^(198 Offline_Uncorrectable.*)/m) {
       my @F = split ' ', $1;
-      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Offline Uncorrectable $dev" --slope=positive --value=$F[9] --type=uint8 --units="Count"`
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Offline Uncorrectable $dev" --slope=positive --value=$F[9] --type=int16 --units="Count"`
     }
     if ($output =~ /^(197 Current_Pending_Sector.*)/m) {
       my @F = split ' ', $1;
-      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Current Pending Sector $dev" --slope=positive --value=$F[9] --type=uint8 --units="Count"`
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD Current Pending Sector $dev" --slope=positive --value=$F[9] --type=int16 --units="Count"`
     }
     if ($output =~ /^(199 UDMA_CRC_Error_Count.*)/m) {
       my @F = split ' ', $1;
-      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD UDMA CRC Error $dev" --slope=positive --value=$F[9] --type=uint32 --units="Count"`
+      `$gmetric --dmax=30000 --tmax=1800 --name="Sensors HDD UDMA CRC Error $dev" --slope=positive --value=$F[9] --type=int16 --units="Count"`
     }
   }
 }
