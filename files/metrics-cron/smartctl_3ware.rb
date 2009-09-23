@@ -17,16 +17,16 @@ if smartctl != "" and tw_cli != ""
           vals = line.split(" ")
           port = "tw_c#{controller}_p#{dev}"
           if line =~ /Temperature_Celsius/
-            puts "#{gmetric} --units=\"degrees C\" --name=\"Sensors HDD Temp #{port}\" --value=#{vals[9]}" if debug
+            #  puts "#{gmetric} --units=\"degrees C\" --name=\"Sensors HDD Temp #{port}\" --value=#{vals[9]}" if debug
             %x{#{gmetric} --units="degrees C" --name="Sensors HDD Temp #{port}" --value=#{vals[9]}}
           elsif line =~ /Current_Pending_Sector/
-            puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD Current Pending Sector #{port}\" --value=#{vals[9]}" if debug
+            #  puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD Current Pending Sector #{port}\" --value=#{vals[9]}" if debug
             %x{#{gmetric} --units="Number" --name="Sensors HDD Current Pending Sector #{port}" --value=#{vals[9]}}
           elsif line =~ /Offline_Uncorrectable/
-            puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD Offline Uncorrectable #{port}\" --value=#{vals[9]}" if debug
+            #  puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD Offline Uncorrectable #{port}\" --value=#{vals[9]}" if debug
             %x{#{gmetric} --units="Number" --name="Sensors HDD Offline Uncorrectable #{port}" --value=#{vals[9]}}
           elsif line =~ /UDMA_CRC_Error_Count/
-            puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD UDMA CRC Error #{port}\" --value=#{vals[9]}" if debug
+            #  puts "#{gmetric} --units=\"Number\" --name=\"Sensors HDD UDMA CRC Error #{port}\" --value=#{vals[9]}" if debug
             %x{#{gmetric} --units="Number" --name="Sensors HDD UDMA CRC Error #{port}" --value=#{vals[9]}}
           end
         }
