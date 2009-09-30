@@ -8,12 +8,10 @@ exit 0 if $? != 0
 debug = ARGV[1] == "debug" ? true : false;
 
 drives = Facter.value("harddrives_smartcaps").split(",")
-gmetric = "#{gmetric} --dmax=30000 --tmax=1800 --type=uint16 --slope=positive"
+gmetric = "#{gmetric} --dmax=30000 --tmax=1800 --type=int16"
 
 if smartctl != "" && drives.length > 0
   drives.each{ |dev|
-    #%x{#{smartctl} -d sat -c -q silent /dev/#{dev}}
-    #next if $?.exitstatus != 0
     %x{#{smartctl} -A /dev/#{dev}}.chomp.each { |line|
       vals = line.split(" ")
       if line =~ /Temperature_Celsius/
