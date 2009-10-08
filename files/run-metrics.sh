@@ -8,5 +8,5 @@
 ## run gmetrics from directory $1
 . /etc/profile
 for I in $(ls $1/* 2>/dev/null); do
-	[[ -x $I ]] && $I 2>/dev/null
+	[[ -x $I ]] && $I 2>/dev/null 
 done
