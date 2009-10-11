@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 #
-smartctl = %x{which smartctl}.chomp
+uname = %x{uname}.chomp
+smartctl = case uname
+  when "Darwin" then "/opt/local/sbin/smartctl"
+  when "FreeBSD" then "/usr/local/sbin/smartctl"
+  else "/usr/sbin/smartctl"
+end
+
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
 debug = ARGV[1] == "debug" ? true : false;
