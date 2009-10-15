@@ -18,7 +18,7 @@ set -e
 case "$1" in
   start)
     # restore from disk to tmpfs if necessary
-      if [ "$TMPFS" -a -d $TMPFS/../ -a ! -d $TMPFS ]; then
+      if [ "$TMPFS" -a ! -d $TMPFS ]; then
           echo -n "Restoring $TMPFS from /var/lib/ganglia/rrds..."
           rsync -aczH /var/lib/ganglia/rrds/ $TMPFS
          chown -R ganglia:ganglia $TMPFS
