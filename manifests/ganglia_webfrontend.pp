@@ -48,5 +48,4 @@ class ganglia::webfrontend {
 
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_all" |>>
-
 }
