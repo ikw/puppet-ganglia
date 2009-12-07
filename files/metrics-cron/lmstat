@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # $Id: lmstat 1299 2008-05-12 14:55:08Z admin $
 
 # author: udo waechter, 2007-07-21
@@ -18,7 +17,14 @@ G_NAME="License Use"
 G_TYPE="uint8"
 G_UNITS="Usage"
 
+GMETRIC="${GMETRIC} --slope=positive --dmax=30000 --tmax=300  --type=${G_TYPE} --units=${G_UNITS}"
+
 for TBOX in $TOOLBOXES; do
-	VAL=$($LMSTAT -f $TBOX |grep "Users of" | cut -f 2 -d \; |sed s/[^[:digit:]]//g)
-	$GMETRIC --dmax=30000 --tmax=300 --name="${G_NAME} ${TBOX}" --value=${VAL} --type=${G_TYPE} --units=${G_UNITS}
+    OUT=$($LMSTAT -f $TBOX)
+	VAL=$(echo "$OUT"|grep "Users of" | cut -f 2 -d \; |sed s/[^[:digit:]]//g)
+	$GMETRIC --name="${G_NAME} ${TBOX}" --value=${VAL}
+	LOCAL=$(echo "$OUT"| grep -e '\/dev' |grep  -e '[pts|ttys]' |wc -l)
+	$GMETRIC --name="${G_NAME} ${TBOX} local" --value=${LOCAL}
+	GRID=$(expr ${VAL} - ${LOCAL})
+	$GMETRIC--name="${G_NAME} ${TBOX} grid" --value=${GRID}
 done

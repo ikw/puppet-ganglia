@@ -3,7 +3,7 @@
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
 
-readings = %x{ipmitool sdr list 2>/dev/null | grep -v "Not Readable" |grep -v "0x" |grep -v disabled}
+readings = %x{ipmitool sdr list 2>/dev/null | grep -v "Not Readable" |grep -v "0x" |grep -v disabled | grep -v ns | grep -v nr}
 #readings = File.open("sensread.txt").read
 hsh = {}
 idx=0
