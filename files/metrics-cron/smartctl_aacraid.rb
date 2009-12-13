@@ -3,12 +3,12 @@
 #
 require 'fileutils'
 ### pid file handling
-pidfile="/var/run/#{$0}.pid"
+fname=File.basename($0)
+pidfile="/var/run/#{fname}.pid"
 exit 0 if File.exist?(pidfile)
 pid=Process.pid
 File.open(pidfile,"w") { |f| f.write(pid) }
 ##
-
 
 uname = %x{uname}.chomp
 smartctl = case uname
