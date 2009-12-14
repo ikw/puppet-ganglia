@@ -25,8 +25,9 @@ for TBOX in $TOOLBOXES; do
     $GMETRIC --name="${G_NAME} ${TBOX} total" --value=${TOTAL}
 	VAL=$(echo "$OUT"|grep "Users of" | cut -f 2 -d \; |sed s/[^[:digit:]]//g)
 	$GMETRIC --name="${G_NAME} ${TBOX}" --value=${VAL}
-	LOCAL=$(echo "$OUT"| grep -e '\/dev' |grep  -e '[pts|ttys]' |wc -l)
+	
+	GRID=$(echo "$OUT"| grep -e '\/dev\/tty\ '|wc -l)
+	LOCAL=$(expr ${VAL} - ${GRID})
 	$GMETRIC --name="${G_NAME} ${TBOX} local" --value=${LOCAL}
-	GRID=$(expr ${VAL} - ${LOCAL})
 	$GMETRIC --name="${G_NAME} ${TBOX} grid" --value=${GRID}
 done
