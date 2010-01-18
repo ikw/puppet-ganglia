@@ -2,6 +2,11 @@
 # $Id$
 #
 require 'fileutils'
+
+#exit if we already have running smartctl processes
+%x{pgrep smartctl}
+exit 0 if $? == 0
+
 ### pid file handling
 fname=File.basename($0)
 pidfile="/var/run/#{fname}.pid"
