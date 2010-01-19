@@ -26,7 +26,10 @@ class ganglia::webfrontend {
   }
    # include ganglia::metaserver::common
     include webserver::apache2::basic
-    package{["libapache2-mod-php5", "libgd2-xpm"]:
+    if !defined(Package["libapache2-mod-php5"]){
+      package{"libapache2-mod-php5": }
+    }      
+    package{["libgd2-xpm"]:
       ensure => "present",
              before => Package["ganglia-webfrontend"],
     }
