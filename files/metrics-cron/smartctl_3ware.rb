@@ -2,6 +2,11 @@
 # $Id$
 #
 require 'fileutils'
+
+#exit if we already have running smartctl processes
+%x{pgrep smartctl}
+exit 0 if $? == 0
+
 ### pid file handling
 fname=File.basename($0)
 pidfile="/var/run/#{fname}.pid"
@@ -13,13 +18,11 @@ smartctl = %x{which smartctl}.chomp
 tw_cli = %x{which tw_cli}.chomp
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
+
 debug = ARGV[0] == "debug" ? true : false;
 
-#exit if we already have running smartctl processes
-%x{pgrep smartctl}
-exit 0 if $? == 0
-
 gmetric = "#{gmetric} --dmax=30000 --tmax=1800 --type=uint16 --slope=positive"
+
 if smartctl != "" and tw_cli != ""
   %x{ls /dev/tw*}.chomp.split(/\n/).each{ |tw|
     controller=tw.match(/[0-9]+/)[0]

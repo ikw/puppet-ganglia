@@ -17,9 +17,9 @@ File.open(pidfile,"w") { |f| f.write(pid) }
 
 uname = %x{uname}.chomp
 smartctl = case uname
-  when "Darwin" then "/opt/local/sbin/smartctl"
-  when "FreeBSD" then "/usr/local/sbin/smartctl"
-  else "/usr/sbin/smartctl"
+when "Darwin" then "/opt/local/sbin/smartctl"
+when "FreeBSD" then "/usr/local/sbin/smartctl"
+else "/usr/sbin/smartctl"
 end
 
 gmetric = %x{which gmetric}.chomp
