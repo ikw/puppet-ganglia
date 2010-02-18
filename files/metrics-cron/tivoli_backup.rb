@@ -16,7 +16,7 @@ logs.each do |log|
     %x{tail -13 /var/log/dsmsched.log |grep Total |sed -e 's/,//g' -e 's/ MB//' -e 's/bytes/MB/' -e 's/Total number of //g'}.chomp.each do |line|
       nam=line.split(":")
       #puts "#{gmetric} --name=\"Tivoli #{label} #{nam[0].lstrip.rstrip}\" --value=#{nam[1].lstrip.rstrip}"
-      %x{#{gmetric} --name=\"Tivoli #{label} #{nam[0].lstrip.rstrip}\" --value=#{nam[1].lstrip.rstrip}}
+      %x{#{gmetric} --name=\"Tivoli #{label} #{nam[0].lstrip.rstrip}\" --value=#{nam[1].lstrip.rstrip.to_i}}
     end
   end
 end
