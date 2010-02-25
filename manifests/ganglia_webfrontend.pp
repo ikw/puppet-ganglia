@@ -1,4 +1,4 @@
-# $Id$
+gr# $Id$
 # Writtenby: udo.waechter@uni-osnabrueck.de
 #
 # _Class:_ ganglia::webfrontend

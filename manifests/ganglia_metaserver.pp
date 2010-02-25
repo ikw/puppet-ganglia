@@ -115,6 +115,8 @@ class ganglia::metaserver {
 #collect the meta configs for this host.  
     File <<| tag == "ganglia_metad_${hostname}" |>>
 
+  $presence = "absent"
+  include ganglia::metaserver::tmpfs
 }
 # Writtenby: udo.waechter@uni-osnabrueck.de
 #
@@ -136,7 +138,8 @@ class ganglia::metaserver {
 class ganglia::metaserver::none {
   $present = "absent"
   include ganglia::metaserver::common
-
+  $presence = "absent"
+  include ganglia::metaserver::tmpfs
 }
 
 class ganglia::metaserver::tmpfs { 
