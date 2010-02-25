@@ -10,7 +10,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/gmetad
 NAME=gmetad
 DESC="Ganglia Monitor Meta-Daemon"
-TMPFS=/mnt/ganglia/rrds
+TMPFS=""
 test -x $DAEMON || exit 0
 
 set -e
@@ -18,8 +18,10 @@ set -e
 case "$1" in
   start)
   # restore from disk to tmpfs if necessary
-  TMPFSR=$(dirname $TMPFS)
-  if [ "$TMPFS" -a -d $TMPFSR -a ! -d $TMPFS ]; then
+  if [ -n "$TMPFS" -a -d "$TMPFS" ]; then
+    TMPFSR=$(dirname $TMPFS)
+  fi
+  if [ -n "$TMPFS" -a -d "$TMPFSR" -a ! -d "$TMPFS" ]; then
     echo -n "Restoring $TMPFS from /var/lib/ganglia/rrds..."
     rsync -aczH /var/lib/ganglia/rrds/ $TMPFS
     chown -R ganglia:ganglia $TMPFS

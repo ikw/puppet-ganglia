@@ -18,7 +18,7 @@ $template_name = "default";
 #
 
 # Where gmetad stores the rrd archives.
-$gmetad_root = "/mnt/ganglia";
+$gmetad_root = "/var/lib/ganglia";
 $rrds = "$gmetad_root/rrds";
 
 # Leave this alone if rrdtool is installed in $gmetad_root,
