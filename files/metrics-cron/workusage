@@ -8,6 +8,7 @@ require 'fileutils'
 work="/work"
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
+exit 0 if !File.exist?(work)
 
 statefile="/var/tmp/workusage.state"
 #if the direcotry does not exist, do nothing
