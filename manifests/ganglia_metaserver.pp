@@ -76,7 +76,7 @@ class ganglia::metaserver::common {
             notify => Exec["generate-metadconf"],  
             require => [ Package["${package}"], File["${ganglia_metacollects}"] ],
   }
-
+  notice("${fqdn} is a ganglia::metaserver")
   @@file{"${ganglia_metacollects}/meta-all-${fqdn}":
     tag => "ganglia_metad_all",
         ensure => "${presence}",

@@ -144,9 +144,9 @@ class ganglia::monitor {
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
     tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
 	ensure => $presence,
+	    group => "root",
 	notify => Exec["generate-metadconf"],
 	content => template("ganglia/ganglia-datasource-cluster.erb"),
-
   }   
 
 # metrics configuration
