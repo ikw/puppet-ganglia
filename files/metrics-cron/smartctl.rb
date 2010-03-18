@@ -8,14 +8,6 @@ require 'fileutils'
 %x{pgrep smartctl}
 exit 0 if $? == 0
 
-### pid file handling
-fname=File.basename($0)
-pidfile="/var/run/#{fname}.pid"
-exit 0 if File.exist?(pidfile)
-pid=Process.pid
-File.open(pidfile,"w") { |f| f.write(pid) }
-##
-
 uname = %x{uname}.chomp
 smartctl = case uname
 when "Darwin" then "/opt/local/sbin/smartctl"
@@ -54,5 +46,3 @@ if smartctl != "" && drives.length > 0
     }
   }
 end
-## remove pid
-FileUtils.remove(pidfile)
