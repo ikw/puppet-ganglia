@@ -41,7 +41,7 @@ udp_send_channel {
  # ttl = 1 
 } 
 
-<% if has_variable?("NAGIOS_HOST") and scope.lookupvar("NAGIOS_HOST") != "" -%>
+<% if has_variable?("NAGIOS_HOST") and scope.lookupvar("NAGIOS_HOST") != "" and kernel != "FreeBSD" -%>
   udp_send_channel { 
     ## ALSO SEND TO NAGIOS ####
     host = <%= scope.lookupvar("NAGIOS_HOST") %> 
@@ -54,6 +54,7 @@ udp_recv_channel {
   <% if has_variable?("primary_netif") and primary_netif != "" -%>
   #  mcast_if = <%= primary_netif %>
   <% end -%> 
+  bind = <%= ipaddress %>
   port = <%= ganglia_mcast_port %> 
   #bind = <%= ganglia_mcast_join %> 
 }
@@ -62,7 +63,6 @@ udp_recv_channel {
    an xml description of the state of the cluster */ 
 tcp_accept_channel { 
   port = <%= ganglia_xml_port %>
-  bind = <%= ipaddress %>
   <% if has_variable?("primary_netif") and primary_netif != "" -%>
     interface = <%= primary_netif %>
   <% end -%>

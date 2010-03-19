@@ -3,14 +3,18 @@
 $ganglia_metacollects = "/var/lib/puppet/exported/ganglia-metad"
 $ganglia_metrics = "/var/lib/puppet/exported/ganglia-metrics"
 $ganglia_metrics_cron = "${ganglia_metrics}/cron"
-$ganglia_metrics_py = "/usr/lib/ganglia/python_modules"
+$ganglia_metrics_py = $kernel ? {
+  "Darwin" => "/opt/local/lib/ganglia/python_modules",
+    default => "/usr/lib/ganglia/python_modules"
+}
 $ganglia_mconf_dir = $kernel ? {
   "FreeBSD" => "/usr/local/etc",
-    default => "/etc/ganglia"
+    "Darwin" => "/opt/local/etc/ganglia",
+      default => "/etc/ganglia"
 }
 $service = $kernel ? {
   "FreeBSD" => "gmond",
-    "Darwin" => "de.ikw.uos.gmond",
+    "Darwin" => "org.macports.ganglia",
     default => "ganglia-monitor",
 }
 
@@ -119,9 +123,9 @@ define ganglia::gmetric::cron(
     )
 {
   $name_real = $metric_name ? {
-     "" => $name,
-       default => $metric_name
-   }  
+    "" => $name,
+    default => $metric_name
+  }  
   $sname = $source_name ? {
     "" => "${name_real}",
     default => "${source_name}"
@@ -130,7 +134,7 @@ define ganglia::gmetric::cron(
     "" => "ganglia/metrics-cron/${sname}",
     default => "${source}/${sname}",
   }
- 
+
   case $runwhen {
     "1","5","15","30","60": {
       debug("running every \"${runwhen}\" minutes")

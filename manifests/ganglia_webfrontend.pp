@@ -20,27 +20,27 @@
 #
 class ganglia::webfrontend {
   $www_dir = "/usr/share/ganglia-webfrontend"
-  file{$www_dir:
-    source => "puppet:///ganglia/ganglia-webfrontend",
-    recurse => true,
-  }
-   # include ganglia::metaserver::common
-    include webserver::apache2::basic
+    file{$www_dir:
+      source => "puppet:///ganglia/ganglia-webfrontend",
+	     recurse => true,
+    }
+# include ganglia::metaserver::common
+  include webserver::apache2::basic
     if !defined(Package["libapache2-mod-php5"]){
       package{"libapache2-mod-php5": }
     }      
-    package{["libgd2-xpm"]:
-      ensure => "present",
-             before => Package["ganglia-webfrontend"],
-    }
+  package{["libgd2-xpm"]:
+    ensure => "present",
+	   before => Package["ganglia-webfrontend"],
+  }
 
   webserver::apache2::virtualhost{"${fqdn}_80":
     servername => "${fqdn}",
-               documentroot => "/usr/share/ganglia-webfrontend",
-               serveradmin => "webmaster@ikw.uni-osnabrueck.de",
-               syncconf => false,
-               order => "000",
-               additional => "Alias /munin/ /var/lib/munin/www/",
+	       documentroot => "/usr/share/ganglia-webfrontend",
+	       serveradmin => "webmaster@ikw.uni-osnabrueck.de",
+	       syncconf => false,
+	       order => "000",
+	       additional => "Alias /munin/ /var/lib/munin/www/",
   }
   webserver::apache2::config{"ganglia-webfrontend":
     ensure => "absent",

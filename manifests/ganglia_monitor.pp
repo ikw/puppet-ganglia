@@ -26,83 +26,64 @@ class ganglia::monitor {
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
-	"Darwin" => "ganglia-3.1.2-2.pkg.dmg",
-	default => "ganglia-monitor",
+	"Darwin" => "ganglia",
+	default => "ganglia-monitor"
     }
 
   $pathprefix = $kernel ? {
     "FreeBSD" => "/usr/local",
-      default => "/usr",
+      "Darwin" => "/opt/local",
+      default => "/usr"
   } 
   $run_as = $kernel ? {
     "Darwin" => "nobody",
-      default => "ganglia",
+      default => "ganglia"
   }
+  $pack_present = $presence ? {
+    "absent" => "absent",
+      default => $kernel ? {
+	"Linux" => "3.1.2-ikw-1",
+	default => $presence
+      },
+  }
+  notice("${fqdn} should ${package} have ${presence}")
+  package{"${package}":
+    before => [ Service["${service}"], 
+	   File["${ganglia_monitor_conf}"] ],
+	   ensure => $presence,
+  }
+
   case $kernel {
     "Linux": {
-      $pack_present = $presence ? {
-	"absent" => "absent",
-	  default => "3.1.2-ikw-1"
-      }
+      file{"/etc/init.d/ganglia-monitor":
+	source => "puppet:///ganglia/gmond-init",
+	       notify => Service["${service}"],
+	       before => Service["${service}"],
+      }  
+
       package{"libganglia1":
 	ensure => $pack_present,
-	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
+	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"], Package["${package}"] ],
       }      
-    package{"${package}":
-      ensure => $pack_present,
-             before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
-             require => Package["libganglia1"],
-          }
+
       package{"ganglia-module-iostat":
-      ensure => $presence,
-        notify => Service["${service}"],
+	ensure => $presence,
+	       notify => Service["${service}"],
       }
-      file {"/etc/ganglia/conf.d/iostat.conf":
-        source => "puppet:///ganglia/mod_iostat.conf",
-      ensure => $presence,
-        notify => Service["${service}"],
+      file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
+	source => "puppet:///ganglia/mod_iostat.conf",
+	       ensure => $presence,
+	       notify => Service["${service}"],
       }
-  }      
+    }      
     "Darwin": {
-      pkg_deploy{"${package}": 
-	before => [ Service["${service}"], File["${ganglia_monitor_conf}"] ],
-      }
-      file{"/Library/LaunchDaemons/${service}.plist":
-	content => template("ganglia/${service}.plist.erb"),
-		require => Pkg_deploy["${package}"],
-      }      
       darwin_firewall{"any":
 	port => "8649",
 	     ensure => $presence,
       }
     }
-    default: {
-	       package{"${package}":
-		 before => [ Service["${service}"], 
-			File["${ganglia_monitor_conf}"] ],
-			ensure => $presence,
-	       }
-	     }
   }  
-  case $kernel {
-    "Linux": {
-      nagios2_service { "${fqdn}_mem_percent_ganglia":
-              service_description => "mem_percent_ganglia",
-                check_command => "check_ganglia!mem_percent_ganglia!15!30!${ganglia_metaserver_ip}",
-                servicegroups => "Memory",
-                notification_options => "c,u",
-      ensure => defined(Class["Ganglia::Monitor::None"]) ? {
-        true => "absent",
-          default => $presence
-      },
-            }      
-      file{"/etc/init.d/ganglia-monitor":
-	source => "puppet:///ganglia/gmond-init",
-	       notify => Service["${service}"],
-	       before => Service["${service}"],
-      }          
-    }
-  }
+#### configure the service daemon
   $running = $presence ? {
     "absent" => "stopped",
       default => "running"
@@ -111,40 +92,32 @@ class ganglia::monitor {
     "absent" => "false",
       default => "true"
   }
+
   service{"${service}":
     ensure => "${running}",
 	   enable => "${enabled}",
 	   pattern => "gmond",
 	   subscribe => File["${ganglia_monitor_conf}"],
-	   require => $kernel ? {
-	     "Darwin" => Pkg_deploy["${package}"],
-	     default => Package["${package}"],
-	   }
+	   require => Package["${package}"],
   }
+
   file{"${ganglia_mconf_dir}":
     ensure => "directory",
   }
   file {"${ganglia_mconf_dir}/conf.d":
     ensure => "directory",
 	   require => File["${ganglia_mconf_dir}"]
-  } 
+  }
+  notice("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
   file{"${ganglia_monitor_conf}":
     content => template("ganglia/ganglia-monitor-conf.erb"),
-	    require => $kernel ? {
-	      "Darwin" => [ 
-		File["${ganglia_mconf_dir}"], 
-	      Pkg_deploy["${package}"] 
-		],
-	      default => [ 
-		File["${ganglia_mconf_dir}"],  
-	      Package["${package}"] 
-		],
-	    }
+	    require =>  [ File["${ganglia_mconf_dir}"],  
+	      Package["${package}"] ],
   }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
     tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
 	ensure => $presence,
-	    group => "root",
+	group => "root",
 	notify => Exec["generate-metadconf"],
 	content => template("ganglia/ganglia-datasource-cluster.erb"),
   }   
@@ -161,14 +134,68 @@ class ganglia::monitor {
 	   owner => root,
 	   require => File["${ganglia_metrics}"],
   }
+
+## monitoring 
   monit::process{"gmond":
     start => "/etc/init.d/ganglia-monitor start",
 	  stop => "/etc/init.d/ganglia-monitor stop",
 	  ensure => $presence,
   }
+
+  nagios2_service { "${fqdn}_mem_percent_ganglia":
+    service_description => "mem_percent_ganglia",
+			check_command => "check_ganglia!mem_percent_ganglia!15!30!${ganglia_metaserver_ip}",
+			servicegroups => "Memory",
+			notification_options => "c,u",
+			ensure => defined(Class["Ganglia::Monitor::None"]) ? {
+			  true => "absent",
+			  default => $kernel ? {
+			  "Darwin" => "absent",
+			  default => $presence
+			  }
+			},
+  }
+  case $kernel {
+    "Darwin": {
+      #/Library/LaunchDaemons/de.ikw.uos.gmond.plist
+                  file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
+                   content => template("ganglia/de.ikw.uos.gmond.plist.erb")
+                  }
+                  service{"de.ikw.uos.gmond":
+                  ensure => stopped,
+                    enable => false,
+                    require => File["/Library/LaunchDaemons/de.ikw.uos.gmond.plist"],
+                  }
+                  file{[
+                    "/usr/bin/ganglia-config",
+                    "/usr/bin/gstat",
+                    "/usr/bin/gmetric",
+                    "/etc/ganglia/",
+                    "/usr/include/ganglia.h",
+                    "/usr/include/ganglia_gexec.h",
+                    "/usr/include/gm_metric.h",
+                    "/usr/include/gm_mmn.h",
+                    "/usr/include/gm_msg.h",
+                    "/usr/include/gm_protocol.h",
+                    "/usr/include/gm_value.h",
+                    "/usr/lib/ganglia",
+                    "/usr/lib/libganglia-3.1.2.0.0.0.dylib",
+                    "/usr/lib/libganglia-3.1.2.0.dylib",
+                    "/usr/lib/libganglia.a",
+                    "/usr/lib/libganglia.dylib",
+                    "/usr/lib/libganglia.la",
+                    "/usr/sbin/gmond"
+                    ]:
+                  ensure => "absent",
+                    backup => false,
+                    recurse => true,
+                    force => true,
+                  }
+    }
+  }
 }
 
 class ganglia::monitor::none {
   $present = "absent"
-    include ganglia::monitor 
+    include ganglia::monitor
 }
