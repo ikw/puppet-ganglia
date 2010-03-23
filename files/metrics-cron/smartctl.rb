@@ -17,7 +17,7 @@ end
 
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
-debug = ARGV[1] == "debug" ? true : false;
+debug = ARGV[0] == "debug" ? true : false;
 drives = Facter.value("harddrives_smartcaps")
 if drives.nil?
   exit 0
