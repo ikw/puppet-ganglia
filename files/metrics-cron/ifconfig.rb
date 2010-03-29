@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby1.8
 # $Id$
 
 # ifconfig.rb - show ethernet device statistics
