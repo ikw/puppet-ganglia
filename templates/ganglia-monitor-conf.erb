@@ -42,11 +42,11 @@ udp_send_channel {
 } 
 
 <% if has_variable?("NAGIOS_HOST") and scope.lookupvar("NAGIOS_HOST") != "" and kernel != "FreeBSD" -%>
-  udp_send_channel { 
+ # udp_send_channel { 
     ## ALSO SEND TO NAGIOS ####
-    host = <%= scope.lookupvar("NAGIOS_HOST") %> 
+ #   host = <%= scope.lookupvar("NAGIOS_HOST") %> 
     #port = <%= ganglia_mcast_port %> 
-  } 
+ # } 
 <% end -%>
 /* You can specify as many udp_recv_channels as you like as well. */ 
 udp_recv_channel { 
