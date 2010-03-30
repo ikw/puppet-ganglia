@@ -151,7 +151,7 @@ class ganglia::monitor {
 			  true => "absent",
 			  default => $kernel ? {
 			  "Darwin" => "absent",
-			  default => $presence
+			  default => "${presence}", 
 			  }
 			},
   }

@@ -34,6 +34,8 @@ end
 File.open(statefile,'r').each { |line|
   keyval = line.chomp.split(":")
   if keyval[0] != "" and keyval[1] != ""
-  %x{gmetric --dmax=30000 --tmax=3600 --type=uint16 --name="Upgradeable Packages #{keyval[0]}" --value=#{keyval[1]}}
+    gm = "gmetric --dmax=30000 --tmax=3600 --type=uint16 --name='Upgradeable Packages #{keyval[0]}' --value=#{keyval[1]}"
+    puts "#{gm}" if ARGV[0] == "debug"
+    %x{#{gm}}
   end
 }
