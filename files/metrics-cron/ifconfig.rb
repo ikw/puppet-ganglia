@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby1.8
 # $Id$
-
+require 'facter'
 # ifconfig.rb - show ethernet device statistics
 
 exit 0 if %x{uname -s}.chomp != "Linux"
 gmetric = %x{which gmetric}.chomp
 exit 0 if $? != 0
-netif="eth0"
+netif=Facter.value("primary_netif")
 
 ifc = %x{/sbin/ifconfig #{netif}}.chomp
 
