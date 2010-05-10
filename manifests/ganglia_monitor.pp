@@ -46,7 +46,6 @@ class ganglia::monitor {
 	default => $presence
       },
   }
-  notice("${fqdn} should ${package} have ${presence}")
   package{"${package}":
     before => [ Service["${service}"], 
 	   File["${ganglia_monitor_conf}"] ],
@@ -108,7 +107,7 @@ class ganglia::monitor {
     ensure => "directory",
 	   require => File["${ganglia_mconf_dir}"]
   }
-  notice("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
+  debug("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
   file{"${ganglia_monitor_conf}":
     content => template("ganglia/ganglia-monitor-conf.erb"),
 	    require =>  [ File["${ganglia_mconf_dir}"],  
