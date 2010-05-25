@@ -1,4 +1,5 @@
 #!/bin/sh
+# $Id$
 # show free memory on dom0
 
 XM=$(which xm)
