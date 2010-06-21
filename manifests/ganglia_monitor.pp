@@ -42,7 +42,10 @@ class ganglia::monitor {
   $pack_present = $presence ? {
     "absent" => "absent",
       default => $kernel ? {
-	"Linux" => "3.1.2-ikw-1",
+	"Linux" => $lsbdistid ? {
+	  "Lucid" => "latest",
+	    default => "3.1.2-ikw-1"
+	},
 	default => $presence
       },
   }
