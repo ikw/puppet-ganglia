@@ -42,9 +42,9 @@ class ganglia::monitor {
   $pack_present = $presence ? {
     "absent" => "absent",
       default => $kernel ? {
-	"Linux" => $lsbdistid ? {
+	"Linux" => $lsbdistcodename ? {
 	  "Lucid" => "latest",
-	    default => "3.1.2-ikw-1"
+	  default => "3.1.2-ikw-1"
 	},
 	default => $presence
       },
@@ -111,11 +111,11 @@ class ganglia::monitor {
 	   require => File["${ganglia_mconf_dir}"]
   }
   debug("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
-  file{"${ganglia_monitor_conf}":
-    content => template("ganglia/ganglia-monitor-conf.erb"),
-	    require =>  [ File["${ganglia_mconf_dir}"],  
+    file{"${ganglia_monitor_conf}":
+      content => template("ganglia/ganglia-monitor-conf.erb"),
+	      require =>  [ File["${ganglia_mconf_dir}"],  
 	      Package["${package}"] ],
-  }
+    }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
     tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
 	ensure => $presence,
@@ -152,47 +152,47 @@ class ganglia::monitor {
 			ensure => defined(Class["Ganglia::Monitor::None"]) ? {
 			  true => "absent",
 			  default => $kernel ? {
-			  "Darwin" => "absent",
-			  default => "${presence}", 
+			    "Darwin" => "absent",
+			    default => "${presence}", 
 			  }
 			},
   }
   case $kernel {
     "Darwin": {
-      #/Library/LaunchDaemons/de.ikw.uos.gmond.plist
-                  file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
-                   content => template("ganglia/de.ikw.uos.gmond.plist.erb")
-                  }
-                  service{"de.ikw.uos.gmond":
-                  ensure => stopped,
-                    enable => false,
-                    require => File["/Library/LaunchDaemons/de.ikw.uos.gmond.plist"],
-                  }
-                  file{[
-                    "/usr/bin/ganglia-config",
-                    "/usr/bin/gstat",
-                    "/usr/bin/gmetric",
-                    "/etc/ganglia/",
-                    "/usr/include/ganglia.h",
-                    "/usr/include/ganglia_gexec.h",
-                    "/usr/include/gm_metric.h",
-                    "/usr/include/gm_mmn.h",
-                    "/usr/include/gm_msg.h",
-                    "/usr/include/gm_protocol.h",
-                    "/usr/include/gm_value.h",
-                    "/usr/lib/ganglia",
-                    "/usr/lib/libganglia-3.1.2.0.0.0.dylib",
-                    "/usr/lib/libganglia-3.1.2.0.dylib",
-                    "/usr/lib/libganglia.a",
-                    "/usr/lib/libganglia.dylib",
-                    "/usr/lib/libganglia.la",
-                    "/usr/sbin/gmond"
-                    ]:
-                  ensure => "absent",
-                    backup => false,
-                    recurse => true,
-                    force => true,
-                  }
+#/Library/LaunchDaemons/de.ikw.uos.gmond.plist
+      file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
+	content => template("ganglia/de.ikw.uos.gmond.plist.erb")
+      }
+      service{"de.ikw.uos.gmond":
+	ensure => stopped,
+	       enable => false,
+	       require => File["/Library/LaunchDaemons/de.ikw.uos.gmond.plist"],
+      }
+      file{[
+	"/usr/bin/ganglia-config",
+	  "/usr/bin/gstat",
+	  "/usr/bin/gmetric",
+	  "/etc/ganglia/",
+	  "/usr/include/ganglia.h",
+	  "/usr/include/ganglia_gexec.h",
+	  "/usr/include/gm_metric.h",
+	  "/usr/include/gm_mmn.h",
+	  "/usr/include/gm_msg.h",
+	  "/usr/include/gm_protocol.h",
+	  "/usr/include/gm_value.h",
+	  "/usr/lib/ganglia",
+	  "/usr/lib/libganglia-3.1.2.0.0.0.dylib",
+	  "/usr/lib/libganglia-3.1.2.0.dylib",
+	  "/usr/lib/libganglia.a",
+	  "/usr/lib/libganglia.dylib",
+	  "/usr/lib/libganglia.la",
+	  "/usr/sbin/gmond"
+	    ]:
+	    ensure => "absent",
+	  backup => false,
+	  recurse => true,
+	  force => true,
+      }
     }
   }
 }
