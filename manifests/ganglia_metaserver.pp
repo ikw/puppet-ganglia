@@ -38,7 +38,7 @@ class ganglia::metaserver::common {
 
   $pack_ensure = $presence ? {
     "absent" => "absent",
-      default => "3.1.2-ikw-1",
+      default => "latest",
   }
   package{"${package}":
     ensure => "${pack_ensure}",

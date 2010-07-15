@@ -51,19 +51,19 @@ class ganglia::webfrontend {
 
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_all" |>>
-  
-  ## install the cleanupscript
-  file{"/usr/local/sbin/ganglia_rrdcleanup.sh":
+
+## install the cleanupscript
+    file{"/usr/local/sbin/ganglia_rrdcleanup.sh":
       source => "puppet:///ganglia/rrdcleanup.sh",
-          owner => "root",
-          mode => 0700,
-  }
+	     owner => "root",
+	     mode => 0700,
+    }
   cron{"ganglia_rrdcleanup.sh":
-      command => "/usr/local/sbin/ganglia_rrdcleanup.sh",
-          minute => "20",
-          hour => "3",
-          monthday => "*/10",
-          user => "root",
-          require => File["/usr/local/sbin/ganglia_rrdcleanup.sh"]
+    command => "/usr/local/sbin/ganglia_rrdcleanup.sh",
+	    minute => "20",
+	    hour => "3",
+	    monthday => "*/10",
+	    user => "root",
+	    require => File["/usr/local/sbin/ganglia_rrdcleanup.sh"]
   }
 }

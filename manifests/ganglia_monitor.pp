@@ -43,8 +43,8 @@ class ganglia::monitor {
     "absent" => "absent",
       default => $kernel ? {
 	"Linux" => $lsbdistcodename ? {
-	  "Lucid" => "latest",
-	  default => "3.1.2-ikw-1"
+	  "Lenny" => "3.1.7-1+b1",
+	  default => "latest",
 	},
 	default => $presence
       },
@@ -71,6 +71,7 @@ class ganglia::monitor {
       package{"ganglia-module-iostat":
 	ensure => $presence,
 	       notify => Service["${service}"],
+	       require => Package["${package}"],
       }
       file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
 	source => "puppet:///ganglia/mod_iostat.conf",

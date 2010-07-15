@@ -10,7 +10,7 @@ $ganglia_metrics_py = $kernel ? {
 $ganglia_mconf_dir = $kernel ? {
   "FreeBSD" => "/usr/local/etc",
     "Darwin" => "/opt/local/etc/ganglia",
-      default => "/etc/ganglia"
+    default => "/etc/ganglia"
 }
 $service = $kernel ? {
   "FreeBSD" => "gmond",
