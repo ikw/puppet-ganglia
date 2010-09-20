@@ -150,13 +150,14 @@ class ganglia::monitor {
 			check_command => "check_ganglia!mem_percent_ganglia!15!30!${ganglia_metaserver_ip}",
 			servicegroups => "Memory",
 			notification_options => "c,u",
-			ensure => defined(Class["Ganglia::Monitor::None"]) ? {
-			  true => "absent",
-			  default => $kernel ? {
-			    "Darwin" => "absent",
-			    default => "${presence}", 
-			  }
-			},
+			ensure => "absent", 
+			#defined(Class["Ganglia::Monitor::None"]) ? {
+			#  true => "absent",
+			#  default => $kernel ? {
+			#    "Darwin" => "absent",
+			#    default => "${presence}", 
+			#  }
+			#},
   }
   case $kernel {
     "Darwin": {
