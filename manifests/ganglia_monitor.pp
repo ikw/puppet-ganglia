@@ -151,13 +151,13 @@ class ganglia::monitor {
 			servicegroups => "Memory",
 			notification_options => "c,u",
 			ensure => "absent", 
-			#defined(Class["Ganglia::Monitor::None"]) ? {
-			#  true => "absent",
-			#  default => $kernel ? {
-			#    "Darwin" => "absent",
-			#    default => "${presence}", 
-			#  }
-			#},
+#defined(Class["Ganglia::Monitor::None"]) ? {
+#  true => "absent",
+#  default => $kernel ? {
+#    "Darwin" => "absent",
+#    default => "${presence}", 
+#  }
+#},
   }
   case $kernel {
     "Darwin": {

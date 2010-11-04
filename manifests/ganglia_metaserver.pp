@@ -17,10 +17,11 @@
 # _Sample Usage:_
 #
 class ganglia::metaserver::common {
-  $presence = $present ? {
-    "absent" => "absent",
-      default => "present",
-  }
+  tag("ganglia")
+    $presence = $present ? {
+      "absent" => "absent",
+	default => "present",
+    }
   $ganglia_metaconf = "/etc/ganglia/gmetad.conf"
     $package = "gmetad"
     $fpresent = $presence ? {
@@ -62,13 +63,13 @@ class ganglia::metaserver::common {
     "absent" => "false",
       default => "true"
   }
-
-  service{"gmetad":
-    ensure => "${run}",
-	   enable => "${enabled}",
-	   subscribe => Exec["generate-metadconf"],
-	   require => Package["${package}"],
-  }
+  notice("${fqdn} should be \"${presence}\"")
+    service{"gmetad":
+      ensure => "${run}",
+	     enable => "${enabled}",
+	     subscribe => Exec["generate-metadconf"],
+	     require => Package["${package}"],
+    }
 
   file{"${ganglia_metacollects}/0000-gmetad.conf":
     content => template("ganglia/ganglia-metad-conf.erb"),
@@ -76,13 +77,12 @@ class ganglia::metaserver::common {
 	    notify => Exec["generate-metadconf"],  
 	    require => [ Package["${package}"], File["${ganglia_metacollects}"] ],
   }
-  notice("${fqdn} is a ganglia::metaserver")
-    @@file{"${ganglia_metacollects}/meta-all-${fqdn}":
-      tag => "ganglia_metad_all",
-	  ensure => "${presence}",
-	  notify => Exec["generate-metadconf"],
-	  content => template("ganglia/ganglia-datasource-all.erb"),
-    }
+  @@file{"${ganglia_metacollects}/meta-all-${fqdn}":
+    tag => "ganglia_metad_all",
+	ensure => "${presence}",
+	notify => Exec["generate-metadconf"],
+	content => template("ganglia/ganglia-datasource-all.erb"),
+  }
 
 ### generate the configuration file
   exec{"generate-metadconf":
@@ -91,6 +91,15 @@ class ganglia::metaserver::common {
 	    require => Package["${package}"],
 	    onlyif => "test -f ${ganglia_metaconf}",
   } 
+  file{["/var/lib/ganglia","/var/lib/ganglia/rrds"]:
+    ensure => $pres_real ? {
+      "absent" => "absent",
+	default => "directory"
+    },
+	   backup => false,
+	   owner => "ganglia",
+	   group => "ganglia",
+  }
   monit::process{"gmetad": ensure => "${presence}" }
 }
 # Writtenby: udo.waechter@uni-osnabrueck.de
@@ -111,11 +120,18 @@ class ganglia::metaserver::common {
 # _Sample Usage:_
 #   +include ganglia::metaserver+
 class ganglia::metaserver {
-  include ganglia::metaserver::common
+  tag("ganglia")
+    $present_real = $present ? {
+      "absent" => "absent",
+	default => "present"
+    }
+  notice ("${fqdn} should be \"${present_real}\"")
+    if $present_real == "present" {
+      include ganglia::metaserver::common
 #collect the meta configs for this host.  
-    File <<| tag == "ganglia_metad_${hostname}" |>>
-
-    $presence = "absent"
+	File <<| tag == "ganglia_metad_${hostname}" |>>
+    }
+  $presence = "absent"
     include ganglia::metaserver::tmpfs
 }
 # Writtenby: udo.waechter@uni-osnabrueck.de
@@ -138,6 +154,7 @@ class ganglia::metaserver {
 class ganglia::metaserver::none {
   $present = "absent"
     include ganglia::metaserver::common
+    include ganglia::metaserver
     $presence = "absent"
     include ganglia::metaserver::tmpfs
 }
@@ -154,6 +171,7 @@ class ganglia::metaserver::tmpfs {
   include ganglia::metaserver::common
 #collect the meta configs for this host.  
     File <<| tag == "ganglia_metad_${hostname}" |>>
+
     if $ganglia_tmpfs_real != "/var/lib/ganglia/rrds" {
       notice("$hostname ganglia::tmpfs ensure: $pres_real, tmpfs: $ganglia_tmpfs_real")
 	cron{"ganglia-tmpfs":
@@ -162,14 +180,6 @@ class ganglia::metaserver::tmpfs {
 		 user => "ganglia",
 		 ensure => $pres_real,
 	}
-      file{"${ganglia_tmpfs_real}":
-	ensure => $pres_real ? {
-	  "absent" => "absent",
-	    default => "directory"
-	},
-	       owner => "ganglia",
-	       group => "ganglia",
-      }
 
       mount{"${ganglia_tmpfs_real}":
 	device => "none",
@@ -182,7 +192,7 @@ class ganglia::metaserver::tmpfs {
 	       dump => 0,
 	       pass => 0,
 	       options => "size=1024M,mode=755,uid=ganglia,gid=ganglia",
-	       require => File["${ganglia_tmpfs_real}"],
+#require => File["${ganglia_tmpfs_real}"],
 	       before => Service["gmetad"],
       }
     }
