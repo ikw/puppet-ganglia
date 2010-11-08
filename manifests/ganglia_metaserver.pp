@@ -48,7 +48,7 @@ class ganglia::metaserver::common {
   case $kernel {
     "Linux": {
       file{"/etc/init.d/gmetad":
-	source => "puppet:///ganglia/gmetad-init",
+	source => "puppet:///modules/ganglia/gmetad-init",
 	       notify => Service["gmetad"],
 	       before => Service["gmetad"],
 	       ensure => "${presence}",

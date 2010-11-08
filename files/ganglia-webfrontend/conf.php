@@ -124,7 +124,7 @@ $default_metric_color = "00AA00";
 #
 # Default metric 
 #
-$default_metric = "load_five";
+$default_metric = "cpu_report";
 
 #
 # remove the domainname from the FQDN hostnames in graphs
@@ -135,7 +135,8 @@ $strip_domainname = true;
 #
 # Optional summary graphs
 #
-$optional_graphs = array('cpu_total_time_sec_byuser','diskfree', 'workusage','seq_no', 'pystones', 'xen_io' );
+# removed: 'cpu_total_time_sec_byuser',
+$optional_graphs = array('diskfree', 'workusage','seq_no', 'pystones', 'xen_io' );
 
 # 
 # Time ranges

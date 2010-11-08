@@ -21,7 +21,7 @@
 class ganglia::webfrontend {
   $www_dir = "/usr/share/ganglia-webfrontend"
     file{$www_dir:
-      source => "puppet:///ganglia/ganglia-webfrontend",
+      source => "puppet:///modules/ganglia/ganglia-webfrontend",
 	     recurse => true,
     }
 # include ganglia::metaserver::common
@@ -54,7 +54,7 @@ class ganglia::webfrontend {
 
 ## install the cleanupscript
     file{"/usr/local/sbin/ganglia_rrdcleanup.sh":
-      source => "puppet:///ganglia/rrdcleanup.sh",
+      source => "puppet:///modules/ganglia/rrdcleanup.sh",
 	     owner => "root",
 	     mode => 0700,
     }

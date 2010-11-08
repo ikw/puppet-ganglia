@@ -58,7 +58,7 @@ class ganglia::monitor {
   case $kernel {
     "Linux": {
       file{"/etc/init.d/ganglia-monitor":
-	source => "puppet:///ganglia/gmond-init",
+	source => "puppet:///modules/ganglia/gmond-init",
 	       notify => Service["${service}"],
 	       before => Service["${service}"],
       }  
@@ -74,7 +74,7 @@ class ganglia::monitor {
 	       require => Package["${package}"],
       }
       file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
-	source => "puppet:///ganglia/mod_iostat.conf",
+	source => "puppet:///modules/ganglia/mod_iostat.conf",
 	       ensure => $presence,
 	       notify => Service["${service}"],
       }
