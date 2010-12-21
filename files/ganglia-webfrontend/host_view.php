@@ -37,7 +37,7 @@ $g_metrics_group = array();
 
 foreach ($metrics as $name => $v)
    {
-       $name = rawurlencode($name);
+       #$name = rawurlencode($name);
        if ($v['TYPE'] == "string" or $v['TYPE']=="timestamp" or
            (isset($always_timestamp[$name]) and $always_timestamp[$name]))
           {
@@ -65,7 +65,7 @@ foreach ($metrics as $name => $v)
                 $graphargs .= "&ti=$title";
              }
              $g_metrics[$name]['graph'] = $graphargs;
-	     $g_metrics[$name]['description'] = isset($v['DESC']) ? $v['DESC'] : '';
+             $g_metrics[$name]['description'] = isset($v['DESC']) ? $v['DESC'] : '';
 
              # Setup an array of groups that can be used for sorting in group view
              if ( isset($metrics[$name]['GROUP']) ) {
@@ -153,7 +153,8 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
 	    }
             $tpl->newBlock("vol_group_info");
             $tpl->assign("group", $group);
-            $tpl->assign("group_metric_count", count($metric_array));
+            $c = count($metric_array);
+            $tpl->assign("group_metric_count", $c);
             $i = 0;
             ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )
@@ -164,8 +165,8 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                      $tpl->assign("alt", "$hostname $name");
                      if (isset($v['description']))
                        $tpl->assign("desc", $v['description']);
-                     if ( !(++$i % $metriccols) )
-                        $tpl->assign("br", "<BR>");
+                     if ( !(++$i % $metriccols) && ($i != $c) )
+                        $tpl->assign("new_row", "</TR><TR>");
                   }
                }
          }

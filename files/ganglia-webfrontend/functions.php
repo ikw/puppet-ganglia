@@ -201,7 +201,7 @@ function node_image ($metrics)
 #
 function find_limits($nodes, $metricname)
 {
-   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end;
+   global $metrics, $clustername, $rrds, $rrd_dir, $start, $end, $rrd_options;
 
    if (!count($metrics))
       return array(0, 0);
@@ -224,8 +224,8 @@ function find_limits($nodes, $metricname)
          $out = array();
 
          $rrd_dir = "$rrds/$clustername/$host";
-	 if (file_exists("$rrd_dir/$metricname.rrd")) {
-		$command = RRDTOOL . " graph '' --start $start --end $end ".
+         if (file_exists("$rrd_dir/$metricname.rrd")) {
+		$command = RRDTOOL . " graph '' $rrd_options --start $start --end $end ".
 		"DEF:limits='$rrd_dir/$metricname.rrd':'sum':AVERAGE ".
 		"PRINT:limits:MAX:%.2lf ".
 		"PRINT:limits:MIN:%.2lf";

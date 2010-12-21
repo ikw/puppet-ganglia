@@ -3,9 +3,8 @@
 
 $majorversion = 3;
 $minorversion = 1;
-$microversion = 2;
+$microversion = 7;
 
-$ganglia_version = "3.1.2";
-$ganglia_release_name    = "Langley";
+$ganglia_version = "3.1.7";
 
 ?>

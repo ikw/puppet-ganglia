@@ -25,6 +25,14 @@ $rrds = "$gmetad_root/rrds";
 # otherwise, change it if it is installed elsewhere (like /usr/bin)
 define("RRDTOOL", "/usr/bin/rrdtool");
 
+# If rrdcached is being used, this argument must specify the 
+# socket to use.
+#
+# ganglia-web only requires, and should use, the low-privilege socket
+# created with the -L option to rrdcached.  gmetad requires, and must use,
+# the fully privileged socket created with the -l option to rrdcached.
+$rrdcached_socket = "";
+
 # Location for modular-graph files.
 $graphdir='./graph.d';
 
@@ -124,7 +132,7 @@ $default_metric_color = "00AA00";
 #
 # Default metric 
 #
-$default_metric = "cpu_report";
+$default_metric = "load_five";
 
 #
 # remove the domainname from the FQDN hostnames in graphs
@@ -189,4 +197,13 @@ $graph_sizes = array(
 );
 $default_graph_size = 'default';
 $graph_sizes_keys = array_keys( $graph_sizes );
+
+# In earlier versions of gmetad, hostnames were handled in a case
+# sensitive manner
+# If your hostname directories have been renamed to lower case,
+# set this option to 0 to disable backward compatibility.
+# From version 3.2, backwards compatibility will be disabled by default.
+# default: true  (for gmetad < 3.2)
+# default: false (for gmetad >= 3.2)
+$case_sensitive_hostnames = true;
 ?>

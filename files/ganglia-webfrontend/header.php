@@ -10,7 +10,8 @@ checkprivate();
 # error messages in ssl_error_log.
 !isset($initgrid) and $initgrid = 0;
 !isset($metricname) and $metricname = "";
-!isset($context_metrics) and $context_metrics = array();
+!isset($context_metrics) and $context_metrics = "";
+
 if ( $context == "control" && $controlroom < 0 )
       $header = "header-nobanner";
 else
@@ -222,13 +223,9 @@ if( $context == "cluster" )
       echo "Check ganglia XML tree (telnet $ganglia_ip $ganglia_port)\n";
       exit;
    }
-   //$firsthost = key($metrics);
-   foreach (array_keys($metrics) as $firsthost){
-   foreach ($metrics[$firsthost] as $m => $foo){
-         if (!in_array($m, $context_metrics))
-         $context_metrics[] = $m; 
-         }   
-   }
+   $firsthost = key($metrics);
+   foreach ($metrics[$firsthost] as $m => $foo)
+         $context_metrics[] = $m;
    foreach ($reports as $r => $foo)
          $context_metrics[] = $r;
    }
