@@ -79,7 +79,8 @@ setuid_username "ganglia"
 #-------------------------------------------------------------------------------
 # The number of threads answering XML requests
 # default: 4
-server_threads 4
+server_threads <%= (processorcount.to_i * 1.5).to_i %>
+#server_threads 2
 #
 #-------------------------------------------------------------------------------
 # Where gmetad stores its round-robin databases
