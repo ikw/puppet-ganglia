@@ -132,7 +132,7 @@ class ganglia::monitor {
 	   mode => 0700
   }
   file{"${ganglia_metrics}/run-metrics.sh":
-    source => "puppet:///ganglia/run-metrics.sh",
+    source => "puppet:///modules/ganglia/run-metrics.sh",
 	   mode => 0700,
 	   owner => root,
 	   require => File["${ganglia_metrics}"],

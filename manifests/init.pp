@@ -66,13 +66,13 @@ define ganglia::gmetric::python(
     }
   }
   file{"${ganglia_metrics_py}/${name}.py":
-    source => "puppet:///${source_real}",
+    source => "puppet:///modules/${source_real}",
 	   ensure => $ensure,
 	   require => File["${ganglia_metrics_py}"],
 	   notify => Service["${service}"],
   }
   file{"${ganglia_mconf_dir}/conf.d/${name}.pyconf":
-    source => "puppet:///${source_real}conf",
+    source => "puppet:///modules/${source_real}conf",
 	   require => [ File["${ganglia_metrics_py}/${name}.py"], File["${ganglia_mconf_dir}/conf.d"] ],
 	   ensure => $ensure,
   }
@@ -82,7 +82,7 @@ define ganglia::gmetric::python(
     }
     default: {
 	       file{"${ganglia_metrics_py}/${additional_lib}":
-		 source => "puppet:///${additional_lib_source}/${additional_lib}",
+		 source => "puppet:///modules/${additional_lib_source}/${additional_lib}",
 			ensure => $ensure,              
 			notify => Service["${service}"],
 	       }
@@ -175,7 +175,7 @@ define ganglia::gmetric::cron(
     }
   }
   file{"${ganglia_metrics_cron}/${runwhen}/${name_real}":
-    source => "puppet:///${source_real}",
+    source => "puppet:///modules/${source_real}",
 	   owner => root,
 	   mode => 0700,
 	   ensure => $ensure,
