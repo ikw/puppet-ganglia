@@ -57,6 +57,7 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
 	source => "puppet:///modules/ganglia/gmond-init",
 	       notify => Service["${service}"],
 	       before => Service["${service}"],
+      ensure => $ensure,
       }  
 
       package{"libganglia1":
@@ -142,7 +143,6 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
 	   mode => 0700,
 	   owner => root,
 	   require => File["${ganglia_metrics}"],
-  ensure => $ensure,
   }
 
 ## monitoring 
