@@ -122,7 +122,7 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
     ensure => $ensure,
     }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
-    tag => "ganglia_gmond_cluster_${ganglia_mcast_port}",
+    tag => "ganglia_gmond_${domain}",
 	ensure => $ensure,
 	group => "root",
 	notify => Exec["generate-metadconf"],

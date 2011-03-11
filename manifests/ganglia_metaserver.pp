@@ -129,7 +129,7 @@ class ganglia::metaserver {
     if $present_real == "present" {
       include ganglia::metaserver::common
 #collect the meta configs for this host.  
-	File <<| tag == "ganglia_metad_${hostname}" |>>
+	File <<| tag == "ganglia_gmond_${domain}" |>>
     }
   $presence = "absent"
     include ganglia::metaserver::tmpfs
@@ -170,7 +170,7 @@ class ganglia::metaserver::tmpfs {
   }
   include ganglia::metaserver::common
 #collect the meta configs for this host.  
-    File <<| tag == "ganglia_metad_${hostname}" |>>
+  File <<| tag == "ganglia_gmond_${domain}" |>>
 
     if $ganglia_tmpfs_real != "/var/lib/ganglia/rrds" {
       notice("$hostname ganglia::tmpfs ensure: $pres_real, tmpfs: $ganglia_tmpfs_real")
