@@ -18,7 +18,12 @@
 # _Sample Usage:_
 #   +include ganglia::monitor+
 #
-class ganglia::monitor ($ensure="present", $cluster="${domain}"){
+class ganglia::monitor ($ensure="present", 
+  $cluster="${domain}",
+  $company="${company}",
+  $latlong="${network_location}",
+  $url="${documentation_url}"
+  ){
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
@@ -54,24 +59,24 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
   case $kernel {
     "Linux": {
       file{"/etc/init.d/ganglia-monitor":
-	source => "puppet:///modules/ganglia/gmond-init",
+         source => "puppet:///modules/ganglia/gmond-init",
 	       notify => Service["${service}"],
 	       before => Service["${service}"],
       ensure => $ensure,
       }  
 
       package{"libganglia1":
-	ensure => $pack_present,
+         ensure => $pack_present,
 	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"], Package["${package}"] ],
       }      
 
       package{"ganglia-module-iostat":
-	ensure => $ensure,
+         ensure => $ensure,
 	       notify => Service["${service}"],
 	       require => Package["${package}"],
       }
       file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
-	source => "puppet:///modules/ganglia/mod_iostat.conf",
+         source => "puppet:///modules/ganglia/mod_iostat.conf",
 	       ensure => $ensure,
 	       notify => Service["${service}"],
       }
@@ -107,13 +112,21 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
             default => "absent",
     },
   }
+    file {"${ganglia_mconf_dir}/conf.d/0000-cluster.conf":
+      content => template("ganglia/gmond-cluster.conf.erb"),
+        require => File["${ganglia_mconf_dir}/conf.d"],
+    }
   file {"${ganglia_mconf_dir}/conf.d":
       ensure => $ensure ? {
               "present" => "directory",
                   default => "absent",
           },
-	   require => File["${ganglia_mconf_dir}"]
+  source => "puppet:///modules/ganglia/conf.d",
+  recurse => true,
+  backup => false,
+	   require => File["${ganglia_mconf_dir}"],
   }
+  
   debug("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
     file{"${ganglia_monitor_conf}":
       content => template("ganglia/ganglia-monitor-conf.erb"),
@@ -122,7 +135,7 @@ class ganglia::monitor ($ensure="present", $cluster="${domain}"){
     ensure => $ensure,
     }
   @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
-    tag => "ganglia_gmond_${domain}",
+    tag => "ganglia_gmond_${cluster}",
 	ensure => $ensure,
 	group => "root",
 	notify => Exec["generate-metadconf"],
