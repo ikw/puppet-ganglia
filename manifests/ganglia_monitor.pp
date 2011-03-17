@@ -112,20 +112,26 @@ class ganglia::monitor ($ensure="present",
             default => "absent",
     },
   }
+      file {"${ganglia_mconf_dir}/conf.d":
+            ensure => $ensure ? {
+                    "present" => "directory",
+                        default => "absent",
+                },
+        source => "puppet:///modules/ganglia/conf.d",
+        recurse => true,
+        backup => false,
+             require => File["${ganglia_mconf_dir}"],
+        }
+        
     file {"${ganglia_mconf_dir}/conf.d/0000-cluster.conf":
       content => template("ganglia/gmond-cluster.conf.erb"),
         require => File["${ganglia_mconf_dir}/conf.d"],
     }
-  file {"${ganglia_mconf_dir}/conf.d":
-      ensure => $ensure ? {
-              "present" => "directory",
-                  default => "absent",
-          },
-  source => "puppet:///modules/ganglia/conf.d",
-  recurse => true,
-  backup => false,
-	   require => File["${ganglia_mconf_dir}"],
-  }
+      file {"${ganglia_mconf_dir}/conf.d/modules.conf":
+            content => template("ganglia/gmond-modules.conf.erb"),
+              require => File["${ganglia_mconf_dir}/conf.d"],
+          }
+  
   
   debug("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
     file{"${ganglia_monitor_conf}":
