@@ -129,7 +129,8 @@ class ganglia::metaserver {
     if $present_real == "present" {
       include ganglia::metaserver::common
 #collect the meta configs for this host.  
-	File <<| tag == "ganglia_gmond_${domain}" |>>
+        #Line <<| tag == "ganglia_gmond_${fqdn}" |>>
+	File <<| tag == "ganglia_gmond_${fqdn}" |>>
     }
   $presence = "absent"
     include ganglia::metaserver::tmpfs

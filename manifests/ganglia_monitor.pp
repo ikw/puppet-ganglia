@@ -22,7 +22,9 @@ class ganglia::monitor ($ensure="present",
   $cluster="${domain}",
   $company="${company}",
   $latlong="${network_location}",
-  $url="${documentation_url}"
+  $url="${documentation_url}",
+  $port="8650",
+  $metaserver="gmetad.${domain}"
   ){
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
@@ -49,6 +51,10 @@ class ganglia::monitor ($ensure="present",
 	},
 	default => $ensure
       },
+  }
+  File{
+      notify => Service["${service}"],
+      ensure => $ensure, 
   }
   package{"${package}":
     before => [ Service["${service}"], 
@@ -140,14 +146,20 @@ class ganglia::monitor ($ensure="present",
 	      Package["${package}"] ],
     ensure => $ensure,
     }
-  @@file{"${ganglia_metacollects}/meta-cluster-${fqdn}":
-    tag => "ganglia_gmond_${cluster}",
+    notice("${fqdn}=$ensure, metaserver=${metaserver}, cluster=${cluster}, port=${port},")
+  #@@line{"${ganglia_metacollects}/ganglia-monitors_${port}":
+  @@file{"${ganglia_metacollects}/ganglia-monitor_${fqdn}":
+    tag => "ganglia_gmond_${metaserver}",
 	ensure => $ensure,
-	group => "root",
 	notify => Exec["generate-metadconf"],
-	content => template("ganglia/ganglia-datasource-cluster.erb"),
+     #line => "data_source ${cluster} ${fqdn}:${port}",
+	content => template("ganglia/ganglia-datasource-cluster.erb")
   }   
-
+  ### Create the listen statement for this port/host
+      file {"${ganglia_mconf_dir}/conf.d/${port}-udp-receive.conf":
+            content => template("ganglia/gmond-udp-receive.conf.erb"),
+              require => File["${ganglia_mconf_dir}/conf.d"],
+      }
 # metrics configuration
   file{"${ganglia_metrics}":
     ensure => $ensure ? {

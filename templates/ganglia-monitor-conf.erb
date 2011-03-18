@@ -44,16 +44,6 @@ udp_send_channel {
     #port = <%= ganglia_mcast_port %> 
 #} 
 <% end -%>
-/* You can specify as many udp_recv_channels as you like as well. */ 
-udp_recv_channel { 
-    #mcast_join = <%= ganglia_mcast_join %>
-<% if has_variable?("primary_netif") and primary_netif != "" -%>
-    #mcast_if = <%= primary_netif %>
-<% end -%> 
-    bind = <%= ipaddress %>
-    port = <%= ganglia_mcast_port %> 
-    #bind = <%= ganglia_mcast_join %> 
-}
 
 /* You can specify as many tcp_accept_channels as you like to share 
 an xml description of the state of the cluster */ 

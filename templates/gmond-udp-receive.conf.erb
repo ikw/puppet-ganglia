@@ -1,0 +1,9 @@
+# $Id$
+#############################
+## PUPPET MANAGED  ##########
+#############################
+/* You can specify as many udp_recv_channels as you like as well. */ 
+udp_recv_channel { 
+    bind = <%= ipaddress %>
+    port = <%= port %> 
+}
