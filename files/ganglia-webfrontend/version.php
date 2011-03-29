@@ -5,6 +5,6 @@ $majorversion = 3;
 $minorversion = 1;
 $microversion = 7;
 
-$ganglia_version = "3.1.7";
+$ganglia_version = "3.1.7-ikw";
 
 ?>
