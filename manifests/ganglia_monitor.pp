@@ -77,21 +77,27 @@ class ganglia::monitor ($ensure="present",
       }      
 
       package{"ganglia-module-iostat":
-         ensure => $ensure,
+	ensure => $is_virtual ? {
+	  "true" => "absent",
+	       default => $ensure
+	},
 	       notify => Service["${service}"],
 	       require => Package["${package}"],
       }
       file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
-         source => "puppet:///modules/ganglia/mod_iostat.conf",
-	       ensure => $ensure,
+	source => "puppet:///modules/ganglia/mod_iostat.conf",
+	       ensure => $is_virtual ? {
+		 "true" => "absent",
+		 default => $ensure
+	       },
 	       notify => Service["${service}"],
       }
     }      
     "Darwin": {
-        #/Library/LaunchDaemons/de.ikw.uos.gmond.plist
-              file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
-            content => template("ganglia/de.ikw.uos.gmond.plist.erb")
-              }        
+#/Library/LaunchDaemons/de.ikw.uos.gmond.plist
+      file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
+	content => template("ganglia/de.ikw.uos.gmond.plist.erb")
+      }        
       darwin_firewall{"any":
 	port => "8649",
 	     ensure => $ensure,
@@ -114,58 +120,58 @@ class ganglia::monitor ($ensure="present",
 
   file{"${ganglia_mconf_dir}":
     ensure => $ensure ? {
-        "present" => "directory",
-            default => "absent",
+      "present" => "directory",
+	default => "absent",
     },
   }
-      file {"${ganglia_mconf_dir}/conf.d":
-            ensure => $ensure ? {
-                    "present" => "directory",
-                        default => "absent",
-                },
-        source => "puppet:///modules/ganglia/conf.d",
-        recurse => true,
-        backup => false,
-             require => File["${ganglia_mconf_dir}"],
-        }
-        
-    file {"${ganglia_mconf_dir}/conf.d/0000-cluster.conf":
-      content => template("ganglia/gmond-cluster.conf.erb"),
-        require => File["${ganglia_mconf_dir}/conf.d"],
-    }
-      file {"${ganglia_mconf_dir}/conf.d/modules.conf":
-            content => template("ganglia/gmond-modules.conf.erb"),
-              require => File["${ganglia_mconf_dir}/conf.d"],
-          }
-  
-  
+  file {"${ganglia_mconf_dir}/conf.d":
+    ensure => $ensure ? {
+      "present" => "directory",
+	default => "absent",
+    },
+	   source => "puppet:///modules/ganglia/conf.d",
+	   recurse => true,
+	   backup => false,
+	   require => File["${ganglia_mconf_dir}"],
+  }
+
+  file {"${ganglia_mconf_dir}/conf.d/0000-cluster.conf":
+    content => template("ganglia/gmond-cluster.conf.erb"),
+	    require => File["${ganglia_mconf_dir}/conf.d"],
+  }
+  file {"${ganglia_mconf_dir}/conf.d/modules.conf":
+    content => template("ganglia/gmond-modules.conf.erb"),
+	    require => File["${ganglia_mconf_dir}/conf.d"],
+  }
+
+
   debug("${fqdn} should ${package} have ${presence} / running: ${running} / enable: ${enabled} / conf: ${ganglia_monitor_conf}") 
     file{"${ganglia_monitor_conf}":
       content => template("ganglia/ganglia-monitor-conf.erb"),
 	      require =>  [ File["${ganglia_mconf_dir}"],  
 	      Package["${package}"] ],
-    ensure => $ensure,
+	      ensure => $ensure,
     }
-    notice("${fqdn}=$ensure, metaserver=${metaserver}, cluster=${cluster}, port=${port},")
-  #@@line{"${ganglia_metacollects}/ganglia-monitors_${port}":
+  notice("${fqdn}=$ensure, metaserver=${metaserver}, cluster=${cluster}, port=${port},")
+#@@line{"${ganglia_metacollects}/ganglia-monitors_${port}":
   @@file{"${ganglia_metacollects}/ganglia-monitor_${fqdn}":
     tag => "ganglia_gmond_${metaserver}",
 	ensure => $ensure,
 	notify => Exec["generate-metadconf"],
-     #line => "data_source ${cluster} ${fqdn}:${port}",
+#line => "data_source ${cluster} ${fqdn}:${port}",
 	content => template("ganglia/ganglia-datasource-cluster.erb")
   }   
-  ### Create the listen statement for this port/host
-      file {"${ganglia_mconf_dir}/conf.d/${port}-udp-receive.conf":
-            content => template("ganglia/gmond-udp-receive.conf.erb"),
-              require => File["${ganglia_mconf_dir}/conf.d"],
-      }
+### Create the listen statement for this port/host
+  file {"${ganglia_mconf_dir}/conf.d/${port}-udp-receive.conf":
+    content => template("ganglia/gmond-udp-receive.conf.erb"),
+	    require => File["${ganglia_mconf_dir}/conf.d"],
+  }
 # metrics configuration
   file{"${ganglia_metrics}":
     ensure => $ensure ? {
       "present" => "directory",
-          default => "absent",
-  },
+	default => "absent",
+    },
 	   owner => "root",
 	   mode => 0700
   }
