@@ -19,42 +19,42 @@
 #   +include ganglia::monitor+
 #
 class ganglia::monitor ($ensure="present", 
-  $cluster="${domain}",
-  $company="${company}",
-  $latlong="${network_location}",
-  $url="${documentation_url}",
-  $port="8650",
-  $metaserver="gmetad.${domain}"
-  ){
+    $cluster="${domain}",
+    $company="${company}",
+    $latlong="${network_location}",
+    $url="${documentation_url}",
+    $port="8650",
+    $metaserver="gmetad.${domain}"
+    ){
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
-	"Darwin" => "ganglia",
-	default => "ganglia-monitor"
+      "Darwin" => "ganglia",
+      default => "ganglia-monitor"
     }
-    debug("${hostname} is: '${ensure}' and cluster: '${cluster}'")
-  $pathprefix = $kernel ? {
-    "FreeBSD" => "/usr/local",
+  debug("${hostname} is: '${ensure}' and cluster: '${cluster}'")
+    $pathprefix = $kernel ? {
+      "FreeBSD" => "/usr/local",
       "Darwin" => "/opt/local",
       default => "/usr"
-  } 
+    } 
   $run_as = $kernel ? {
     "Darwin" => "nobody",
-      default => "ganglia"
+    default => "ganglia"
   }
   $pack_present = $ensure ? {
     "absent" => "absent",
-      default => $kernel ? {
-	"Linux" => $lsbdistcodename ? {
-	  "Lenny" => "3.1.7-1+b1",
-	  default => "latest",
-	},
-	default => $ensure
+    default => $kernel ? {
+      "Linux" => $lsbdistcodename ? {
+	"Lenny" => "3.1.7-1+b1",
+	default => "latest",
       },
+      default => $ensure
+    },
   }
   File{
-      notify => Service["${service}"],
-      ensure => $ensure, 
+    notify => Service["${service}"],
+	   ensure => $ensure, 
   }
   package{"${package}":
     before => [ Service["${service}"], 
@@ -65,21 +65,21 @@ class ganglia::monitor ($ensure="present",
   case $kernel {
     "Linux": {
       file{"/etc/init.d/ganglia-monitor":
-         source => "puppet:///modules/ganglia/gmond-init",
+	source => "puppet:///modules/ganglia/gmond-init",
 	       notify => Service["${service}"],
 	       before => Service["${service}"],
-      ensure => $ensure,
+	       ensure => $ensure,
       }  
 
       package{"libganglia1":
-         ensure => $pack_present,
+	ensure => $pack_present,
 	       before => [ Service["${service}"], File["${ganglia_monitor_conf}"], Package["${package}"] ],
       }      
 
       package{"ganglia-module-iostat":
 	ensure => $is_virtual ? {
 	  "true" => "absent",
-	       default => $ensure
+	    default => $ensure
 	},
 	       notify => Service["${service}"],
 	       require => Package["${package}"],
@@ -96,11 +96,17 @@ class ganglia::monitor ($ensure="present",
     "Darwin": {
 #/Library/LaunchDaemons/de.ikw.uos.gmond.plist
       file{"/Library/LaunchDaemons/de.ikw.uos.gmond.plist":
-	content => template("ganglia/de.ikw.uos.gmond.plist.erb")
+	content => template("ganglia/de.ikw.uos.gmond.plist.erb"),
+		ensure => "absent",
       }        
       darwin_firewall{"any":
 	port => "8649",
 	     ensure => $ensure,
+      }
+      replace{"/opt/local/etc/LaunchDaemon/org.macports.gmond.plist":
+	pattern => '/opt/local/var/log/',
+		replacement => '/var/log/',
+		notify => Service["${service}"],
       }
     }
   }  
