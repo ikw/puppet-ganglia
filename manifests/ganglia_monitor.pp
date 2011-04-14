@@ -103,7 +103,7 @@ class ganglia::monitor ($ensure="present",
 	port => "8649",
 	     ensure => $ensure,
       }
-      replace{"/opt/local/etc/LaunchDaemon/org.macports.gmond.plist":
+      replace{"/opt/local/etc/LaunchDaemon/org.macports.ganglia/org.macports.ganglia.plist":
 	pattern => '/opt/local/var/log/',
 		replacement => '/var/log/',
 		notify => Service["${service}"],
