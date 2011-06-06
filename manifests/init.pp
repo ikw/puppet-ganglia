@@ -148,8 +148,8 @@ define ganglia::gmetric::cron(
   }else{
     file{"${ganglia_metrics_cron}":
       ensure => $ensure ? {
-        "absent" => "absent",
-        default => "directory",
+	"absent" => "absent",
+	  default => "directory",
       },
 	     owner => "root",
 	     mode => 0700,
@@ -161,9 +161,9 @@ define ganglia::gmetric::cron(
   }else{
     file{"${ganglia_metrics_cron}/${runwhen}":
       ensure => $ensure ? {
-      "absent" => "absent",
-      default => "directory",
-    },
+	"absent" => "absent",
+	  default => "directory",
+      },
 	     owner => "root",
 	     mode => 0700,
 	     require => File["${ganglia_metrics_cron}"]
@@ -174,7 +174,7 @@ define ganglia::gmetric::cron(
     debug("already defined.")        
   }else{  
     cron{"ganglia-runmetrics-${runwhen}":
-	      command => "[[ -e ${ganglia_metrics}/run-metrics.sh ]] && ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
+      command => "[[ -e ${ganglia_metrics}/run-metrics.sh ]] && ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
 	      user => root,
 	      minute => "*/${runwhen}",
     }
