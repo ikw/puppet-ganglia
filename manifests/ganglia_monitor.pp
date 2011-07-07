@@ -77,19 +77,21 @@ class ganglia::monitor ($ensure="present",
       }      
 
       package{"ganglia-module-iostat":
-	ensure => $is_virtual ? {
-	  "true" => "absent",
-	    default => $ensure
-	},
+#	ensure => $is_virtual ? {
+#	  "true" => "absent",
+#	    default => $ensure
+#	}
+        ensure => "absent",
 	       notify => Service["${service}"],
 	       require => Package["${package}"],
       }
       file {"${ganglia_mconf_dir}/conf.d/iostat.conf":
 	source => "puppet:///modules/ganglia/mod_iostat.conf",
-	       ensure => $is_virtual ? {
-		 "true" => "absent",
-		 default => $ensure
-	       },
+#	       ensure => $is_virtual ? {
+#		 "true" => "absent",
+#		 default => $ensure
+#	       },
+      ensure => "absent",
 	       notify => Service["${service}"],
       }
     }      
