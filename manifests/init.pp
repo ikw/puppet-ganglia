@@ -174,7 +174,7 @@ define ganglia::gmetric::cron(
     debug("already defined.")        
   }else{  
     cron{"ganglia-runmetrics-${runwhen}":
-      command => "[[ -e ${ganglia_metrics}/run-metrics.sh ]] && ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}",
+      command => "if [ -e ${ganglia_metrics}/run-metrics.sh ]; then ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/${runwhen}; fi",
 	      user => root,
 	      minute => "*/${runwhen}",
     }
