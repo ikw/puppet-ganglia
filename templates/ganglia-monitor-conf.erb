@@ -54,4 +54,4 @@ tcp_accept_channel {
 <% end -%>
 } 
 
-include ('/etc/ganglia/conf.d/*.conf') 
+include ("<%= ganglia_mconf_dir %>/conf.d/*.conf") 

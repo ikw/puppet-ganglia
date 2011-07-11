@@ -36,7 +36,7 @@ class ganglia::webfrontend {
 
   webserver::apache2::virtualhost{"${fqdn}_80":
     servername => "${fqdn}",
-	       documentroot => "/usr/share/ganglia-webfrontend",
+	       documentroot => "/var/www/gweb",
 	       serveradmin => "webmaster@ikw.uni-osnabrueck.de",
 	       syncconf => false,
 	       order => "000",

@@ -26,7 +26,7 @@ if yml
 	  else
 	    units = "degrees C"
 	  end
-		%x{#{gmetric} --dmax=3600 --name="Sensors #{k2}" --value="#{yml[key][k]}" --type=float --tmax=300 --units="#{units}"}
+		%x{#{gmetric} --dmax=3600 --name="Sensors #{k2}" --value=#{yml[key][k]} --type=float --tmax=300 --units="#{units}"}
 	end
       }
     end
