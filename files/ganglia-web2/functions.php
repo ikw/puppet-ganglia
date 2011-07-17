@@ -872,7 +872,6 @@ function get_view_graph_elements($view) {
 function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
   
   global $context, $hostname, $range, $rrd_dir, $size, $conf;
-  
   if ($conf['strip_domainname'])     {
     $hostname = strip_domainname($hostname);
   }
@@ -914,62 +913,68 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
          continue;
 
      $rrd_dir = $conf['rrds'] . "/" . $item['clustername'] . "/" . $item['hostname'];
+     if (preg_match('/^-/',$item['metric']) == 1) {
+	$item['metric'] = preg_replace('/^-/','',$item['metric']);
+     	$add = "_add";
+     }
 
      $metric = sanitize( $item[ 'metric' ] );
      
      $metric_file = $rrd_dir . "/" . $metric . ".rrd";
-    
      // Make sure metric file exists. Otherwise we'll get a broken graph
      if ( is_file($metric_file) ) {
 
        # Need this when defining graphs that may use same metric names
       $unique_id = "a" . $index;
-     
-       $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
+      $unique_id2 = isset($add) ? $unique_id.$add : $unique_id;
+      $label = str_pad( sanitize( $item[ 'label' ] ), $max_label_length );
 
-       // use custom DS defined in json template if it's defined (default = 'sum')
-       if ( isset($item[ 'ds' ]) ) {
-           $DS = sanitize( $item[ 'ds' ] );
-           $series .= " DEF:'$unique_id'='$metric_file':'$DS':AVERAGE ";
-       } else {
-           $series .= " DEF:'$unique_id'='$metric_file':'sum':AVERAGE ";
-       }
+      // use custom DS defined in json template if it's defined (default = 'sum')
+      if ( isset($item[ 'ds' ]) ) {
+	$DS = sanitize( $item[ 'ds' ] );
+	$series .= " DEF:'$unique_id2'='$metric_file':'$DS':AVERAGE ";
+      } else {
+	$series .= " DEF:'$unique_id2'='$metric_file':'sum':AVERAGE ";
+      }
+      if (isset($add)){
+	$add = "CDEF:".$unique_id."=0,".$unique_id2.",- ";
+	$series .= $add." ";
+      }
+      // By default graph is a line graph
+      isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
 
-       // By default graph is a line graph
-       isset( $item['type']) ? $item_type = $item['type'] : $item_type = "line";
+      // TODO sanitize color
+      switch ( $item_type ) {
 
-       // TODO sanitize color
-       switch ( $item_type ) {
-       
-         case "line":
-           // Make sure it's a recognized line type
-           isset($item['line_width']) && in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
-           $series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}' ";
-           break;
-       
-         case "stack":
-           // First element in a stack has to be AREA
-           if ( $stack_counter == 0 ) {
-             $series .= "AREA:'$unique_id'#${item['color']}:'${label}' ";
-             $stack_counter++;
-           } else {
-             $series .= "STACK:'$unique_id'#${item['color']}:'${label}' ";
-           }
-           break;
-        } // end of switch ( $item_type )
-     
-        if ( $conf['graphreport_stats'] ) {
-          $series .= "VDEF:${unique_id}_last=${unique_id},LAST "
-               . "VDEF:${unique_id}_min=${unique_id},MINIMUM "
-               . "VDEF:${unique_id}_avg=${unique_id},AVERAGE "
-               . "VDEF:${unique_id}_max=${unique_id},MAXIMUM "
-               . "GPRINT:'${unique_id}_last':'Now\:%5.1lf%s' "
-               . "GPRINT:'${unique_id}_min':'Min\:%5.1lf%s' "
-               . "GPRINT:'${unique_id}_avg':'Avg\:%5.1lf%s' "
-               . "GPRINT:'${unique_id}_max':'Max\:%5.1lf%s\\l' ";
-        }
+	case "line":
+	  // Make sure it's a recognized line type
+	  isset($item['line_width']) && in_array( $item['line_width'], $line_widths) ? $line_width = $item['line_width'] : $line_width = "1";
+	$series .= "LINE" . $line_width . ":'$unique_id'#${item['color']}:'${label}' ";
+	break;
+
+	case "stack":
+	  // First element in a stack has to be AREA
+	  if ( $stack_counter == 0 ) {
+	    $series .= "AREA:'$unique_id'#${item['color']}:'${label}' ";
+	    $stack_counter++;
+	  } else {
+	    $series .= "STACK:'$unique_id'#${item['color']}:'${label}' ";
+	  }
+	break;
+      } // end of switch ( $item_type )
+
+      if ( $conf['graphreport_stats'] ) {
+	$series .= "VDEF:${unique_id2}_last=${unique_id2},LAST "
+	  . "VDEF:${unique_id2}_min=${unique_id2},MINIMUM "
+	  . "VDEF:${unique_id2}_avg=${unique_id2},AVERAGE "
+	  . "VDEF:${unique_id2}_max=${unique_id2},MAXIMUM "
+	  . "GPRINT:'${unique_id2}_last':'Now\:%5.1lf%s' "
+	  . "GPRINT:'${unique_id2}_min':'Min\:%5.1lf%s' "
+	  . "GPRINT:'${unique_id2}_avg':'Avg\:%5.1lf%s' "
+	  . "GPRINT:'${unique_id2}_max':'Max\:%5.1lf%s\\l' ";
+      }
      } // end of if ( is_file($metric_file) ) {
-     
+
   } // end of foreach( $graph_config[ 'series' ] as $index => $item )
 
   // If we end up with the empty series it means that no RRD files matched. This can happen
@@ -979,107 +984,108 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
     $rrdtool_graph[ 'series' ] = 'HRULE:1#FFCC33:"No matching metrics detected"';   
   else
     $rrdtool_graph[ 'series' ] = $series;
-  
-  
+
+
+  #error_log($series);
   return $rrdtool_graph;
-}
+  }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-// Graphite graphs
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-function build_graphite_series( $config, $host_cluster = "" ) {
-  $targets = array();
-  $colors = array();
-  // Keep track of stacked items
-  $stacked = 0;
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Graphite graphs
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  function build_graphite_series( $config, $host_cluster = "" ) {
+    $targets = array();
+    $colors = array();
+    // Keep track of stacked items
+    $stacked = 0;
 
-  foreach( $config[ 'series' ] as $item ) {
-   
-    if ( $item['type'] == "stack" )
-      $stacked++;
+    foreach( $config[ 'series' ] as $item ) {
 
-    if ( isset($item['hostname']) && isset($item['clustername']) ) {
-      $host_cluster = $item['clustername'] . "." . str_replace(".","_", $item['hostname']);
+      if ( $item['type'] == "stack" )
+	$stacked++;
+
+      if ( isset($item['hostname']) && isset($item['clustername']) ) {
+	$host_cluster = $item['clustername'] . "." . str_replace(".","_", $item['hostname']);
+      }
+
+      $targets[] = "target=". urlencode( "alias($host_cluster.${item['metric']}.sum,'${item['label']}')" );
+      $colors[] = $item['color'];
+
+    }
+    $output = implode( $targets, '&' );
+    $output .= "&colorList=" . implode( $colors, ',' );
+    $output .= "&vtitle=" . urlencode( isset($config[ 'vertical_label' ]) ? $config[ 'vertical_label' ] : "" );
+
+    // Do we have any stacked elements. We assume if there is only one element
+    // that is stacked that rest of it is line graphs
+    if ( $stacked > 0 ) {
+      if ( $stacked > 1 )
+	$output .= "&areaMode=stacked";
+      else
+	$output .= "&areaMode=first";
     }
 
-    $targets[] = "target=". urlencode( "alias($host_cluster.${item['metric']}.sum,'${item['label']}')" );
-    $colors[] = $item['color'];
-
+    return $output;
   }
-  $output = implode( $targets, '&' );
-  $output .= "&colorList=" . implode( $colors, ',' );
-  $output .= "&vtitle=" . urlencode( isset($config[ 'vertical_label' ]) ? $config[ 'vertical_label' ] : "" );
-
-  // Do we have any stacked elements. We assume if there is only one element
-  // that is stacked that rest of it is line graphs
-  if ( $stacked > 0 ) {
-    if ( $stacked > 1 )
-      $output .= "&areaMode=stacked";
-    else
-      $output .= "&areaMode=first";
-  }
-  
-  return $output;
-}
 
 
-/**
- * Check if current user has a privilege (view, edit, etc) on a resource.
- * If resource is unspecified, we assume GangliaAcl::ALL.
- *
- * Examples
- *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::EDIT, $conf ); // user has global edit?
- *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::VIEW, $conf ); // user has global view?
- *   checkAccess( $cluster, GangliaAcl::EDIT, $conf ); // user can edit current cluster?
- *   checkAccess( 'cluster1', GangliaAcl::EDIT, $conf ); // user has edit privilege on cluster1?
- *   checkAccess( 'cluster1', GangliaAcl::VIEW, $conf ); // user has view privilege on cluster1?
- */
-function checkAccess($resource, $privilege, $conf) {
-  
-  if(!is_array($conf)) {
-    trigger_error('checkAccess: $conf is not an array.', E_USER_ERROR);
+  /**
+   * Check if current user has a privilege (view, edit, etc) on a resource.
+   * If resource is unspecified, we assume GangliaAcl::ALL.
+   *
+   * Examples
+   *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::EDIT, $conf ); // user has global edit?
+   *   checkAccess( GangliaAcl::ALL_CLUSTERS, GangliaAcl::VIEW, $conf ); // user has global view?
+   *   checkAccess( $cluster, GangliaAcl::EDIT, $conf ); // user can edit current cluster?
+   *   checkAccess( 'cluster1', GangliaAcl::EDIT, $conf ); // user has edit privilege on cluster1?
+   *   checkAccess( 'cluster1', GangliaAcl::VIEW, $conf ); // user has view privilege on cluster1?
+   */
+  function checkAccess($resource, $privilege, $conf) {
+
+    if(!is_array($conf)) {
+      trigger_error('checkAccess: $conf is not an array.', E_USER_ERROR);
+    }
+    if(!isSet($conf['auth_system'])) {
+      trigger_error("checkAccess: \$conf['auth_system'] is not defined.", E_USER_ERROR);
+    }
+
+    switch( $conf['auth_system'] ) {
+      case 'readonly':
+	$out = ($privilege == GangliaAcl::VIEW);
+	break;
+
+      case 'enabled':
+	// TODO: 'edit' needs to check for writeability of data directory.  error log if edit is allowed but we're unable to due to fs problems.
+
+	$acl = GangliaAcl::getInstance();
+	$auth = GangliaAuth::getInstance();
+
+	if(!$auth->isAuthenticated()) {
+	  $user = GangliaAcl::GUEST;
+	} else {
+	  $user = $auth->getUser();
+	}
+
+	if(!$acl->has($resource)) {
+	  $resource = GangliaAcl::ALL_CLUSTERS;
+	}
+
+	$out = false;
+	if($acl->hasRole($user)) {
+	  $out = (bool) $acl->isAllowed($user, $resource, $privilege);
+	}
+	// error_log("checkAccess() user=$user, resource=$resource, priv=$privilege == $out");
+	break;
+
+      case 'disabled':
+	$out = true;
+	break;
+
+      default:
+	trigger_error( "Invalid value '".$conf['auth_system']."' for \$conf['auth_system'].", E_USER_ERROR );
+	return false;
+    }
+
+    return $out;
   }
-  if(!isSet($conf['auth_system'])) {
-    trigger_error("checkAccess: \$conf['auth_system'] is not defined.", E_USER_ERROR);
-  }
-  
-  switch( $conf['auth_system'] ) {
-    case 'readonly':
-      $out = ($privilege == GangliaAcl::VIEW);
-      break;
-      
-    case 'enabled':
-      // TODO: 'edit' needs to check for writeability of data directory.  error log if edit is allowed but we're unable to due to fs problems.
-      
-      $acl = GangliaAcl::getInstance();
-      $auth = GangliaAuth::getInstance();
-      
-      if(!$auth->isAuthenticated()) {
-        $user = GangliaAcl::GUEST;
-      } else {
-        $user = $auth->getUser();
-      }
-      
-      if(!$acl->has($resource)) {
-        $resource = GangliaAcl::ALL_CLUSTERS;
-      }
-      
-      $out = false;
-      if($acl->hasRole($user)) {
-        $out = (bool) $acl->isAllowed($user, $resource, $privilege);
-      }
-      // error_log("checkAccess() user=$user, resource=$resource, priv=$privilege == $out");
-      break;
-    
-    case 'disabled':
-      $out = true;
-      break;
-    
-    default:
-      trigger_error( "Invalid value '".$conf['auth_system']."' for \$conf['auth_system'].", E_USER_ERROR );
-      return false;
-  }
-  
-  return $out;
-}
-?>
+  ?>
