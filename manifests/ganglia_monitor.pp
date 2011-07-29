@@ -79,7 +79,6 @@ class ganglia::monitor ($ensure="present",
 
     }      
     "Darwin": {
-#/Library/LaunchDaemons/de.ikw.uos.gmond.plist
       darwin_firewall{"any":
 	port => "8649",
 	     ensure => $ensure,
