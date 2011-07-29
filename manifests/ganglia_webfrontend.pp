@@ -19,13 +19,19 @@
 #   +include ganglia::webfrontend+
 #
 class ganglia::webfrontend ($ensure="present",
-    $www_dir = "/var/www/gweb"  
+    $www_dir = "/var/www/gweb",
+    $rrdcached_socket = "unix:/var/run/rrdcached.limited.sock"
     ){
   
     file{$www_dir:
       source => "puppet:///modules/ganglia/ganglia-web2",
 	     recurse => true,
     }
+    file{"${www_dir}/conf_default.php":
+        content => template("ganglia/ganglia-web_conf_default.php.erb"),
+        ensure => $ensure,
+        require => File[$www_dir],
+     }
 # include ganglia::metaserver::common
   include webserver::apache2::basic
     if !defined(Package["libapache2-mod-php5"]){
