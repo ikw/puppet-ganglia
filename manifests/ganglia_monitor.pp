@@ -26,6 +26,8 @@ class ganglia::monitor ($ensure="present",
     $port="8650",
     $metaserver="gmetad.${domain}"
     ){
+        
+  class {"ganglia::monitor::base": ensure => $ensure }
   $ganglia_monitor_conf = "${ganglia_mconf_dir}/gmond.conf"
     $package = $kernel ? {
       "FreeBSD" => "ganglia-monitor-core",
@@ -140,19 +142,7 @@ class ganglia::monitor ($ensure="present",
     content => template("ganglia/gmond-udp-receive.conf.erb"),
         require => File["${ganglia_mconf_dir}/conf.d"],
   }
-  # metrics configuration
-  file{"${ganglia_metrics}/run-metrics.sh":
-    source => "puppet:///modules/ganglia/run-metrics.sh",
-       require => File["${ganglia_metrics}"],
   }
-    }
-    file{"${ganglia_metrics}":
-    ensure => $ensure ? {
-      "present" => "directory",
-    default => "absent",
-    },
-  }
-  
   notice("${fqdn}=$ensure, metaserver=${metaserver}, cluster=${cluster}, port=${port},")
 #@@line{"${ganglia_metacollects}/ganglia-monitors_${port}":
   @@file{"${ganglia_metacollects}/ganglia-monitor_${fqdn}":
@@ -167,4 +157,64 @@ class ganglia::monitor ($ensure="present",
 	  stop => "/etc/init.d/ganglia-monitor stop",
 	  ensure => $ensure,
   }
+}
+
+
+class ganglia::monitor::base ($ensure="present") {
+    # metrics configuration
+  file{"${ganglia_metrics}/run-metrics.sh":
+    source => "puppet:///modules/ganglia/run-metrics.sh",
+       require => File["${ganglia_metrics}"],
+  }
+    file{"${ganglia_metrics}":
+    ensure => $ensure ? {
+      "present" => "directory",
+    default => "absent",
+    },
+     force => true,
+         recurse => true,
+    }
+  
+      file { ["${ganglia_metrics_cron}/1",
+          "${ganglia_metrics_cron}/5",
+          "${ganglia_metrics_cron}/15",
+          "${ganglia_metrics_cron}/30",
+          "${ganglia_metrics_cron}/60"]:
+      ensure => $ensure ? {
+        "absent" => "absent",
+      default => "directory",
+      },
+        require => File["${ganglia_metrics}"],
+         owner => "root",
+         mode => 0700,
+         require => File["${ganglia_metrics_cron}"],
+         force => true,
+         recurse => true,
+    } 
+    Cron {
+        user => "root",
+        ensure => $ensure,
+    }
+    $pre_cmd = "if [ -e ${ganglia_metrics}/run-metrics.sh ]; then " #mind the trailing whitespace
+    $post_cmd = " fi" #space at the beginning
+    cron{"ganglia-runmetrics-1":
+      command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/1;${post_cmd}",
+          minute => "*/1",
+    }
+    cron{"ganglia-runmetrics-5":
+      command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/5;${post_cmd}",
+          minute => "*/5",
+    }
+    cron{"ganglia-runmetrics-15":
+      command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/15;${post_cmd}",
+          minute => "*/15",
+    }
+    cron{"ganglia-runmetrics-30":
+      command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/30;${post_cmd}",
+          minute => "*/30",
+    }
+    cron{"ganglia-runmetrics-60":
+      command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/60;${post_cmd}",
+          minute => "*/60",
+    }
 }

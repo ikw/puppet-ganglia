@@ -38,8 +38,7 @@ class ganglia::webfrontend ($ensure="present",
       package{"libapache2-mod-php5": }
     }      
   package{["libgd2-xpm"]:
-    ensure => "present",
-#	   before => Package["ganglia-webfrontend"],
+    ensure => $ensure,
   }
 
   webserver::apache2::virtualhost{"${fqdn}_80":
@@ -50,12 +49,6 @@ class ganglia::webfrontend ($ensure="present",
 	       syncconf => false,
 	       order => "000",
   }
-  webserver::apache2::config{"ganglia-webfrontend":
-    ensure => "absent",
-  }
-  #package{"ganglia-webfrontend":
-  #  ensure => "latest",
-  #} 
 
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_all" |>>
@@ -72,6 +65,6 @@ class ganglia::webfrontend ($ensure="present",
 	    hour => "3",
 	    monthday => "*/10",
 	    user => "root",
-	    require => File["/usr/local/sbin/ganglia_rrdcleanup.sh"]
+	    require => File["/usr/local/sbin/ganglia_rrdcleanup.sh"],
   }
 }
