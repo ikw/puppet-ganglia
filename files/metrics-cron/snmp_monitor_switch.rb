@@ -7,6 +7,7 @@
 require 'snmp'
 require 'yaml'
 
+switch_ip='10.10.10.10'
 gmetric="gmetric --tmax=60 --dmax=999100 -u 'bytes/min' -t uint32"
 state="/var/lib/puppet/state/snmp_bw.state"
 debug=false
@@ -20,9 +21,9 @@ if File.exist?(state)
 end
 ifTable_columns = ["ifDescr", "ifInOctets", "ifOutOctets", "ifInErrors", "ifOutErrors", ]
 
-SNMP::Manager.open(:Host => '10.10.10.10') do |manager|
-	hname="#{manager.get_value("sysName.0")}.ikw.uni-osnabrueck.de"
-	gmetric2="#{gmetric} --spoof=\"10.10.10.10:#{hname}\""
+SNMP::Manager.open(:Host => switch_ip) do |manager|
+	hname="#{manager.get_value("sysName.0")}"
+	gmetric2="#{gmetric} --spoof=\"#{switch_ip}:#{hname}\""
 	manager.walk(ifTable_columns) do |ifDescr, ifInOctets, ifOutOctets, ifInErrors, ifOutErrors|
 		desc=ifDescr.value.gsub(/\#(.)$/,'0\1').gsub(/\#/,'')
 		next if desc =~ /^IP\ Interface/
