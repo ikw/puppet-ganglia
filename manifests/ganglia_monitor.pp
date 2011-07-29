@@ -161,17 +161,28 @@ class ganglia::monitor ($ensure="present",
 
 class ganglia::monitor::base ($ensure="present") {
 # metrics configuration
+	File {
+		owner => "root",
+		      mode => "0700",
+		      force => true,
+		      recurse => true,
+		      backup => false,
+	}
 	file{"${ganglia_metrics}/run-metrics.sh":
 		source => "puppet:///modules/ganglia/run-metrics.sh",
 		       require => File["${ganglia_metrics}"],
+		       ensure => $ensure,
+	}
+	$ens_dir = $ensure ? {
+		"present" => "directory",
+			default => $ensure,
 	}
 	file{"${ganglia_metrics}":
-		ensure => $ensure ? {
-			"present" => "directory",
-				default => "absent",
-		},
-		       force => true,
-		       recurse => true,
+		ensure => $ens_dir,
+	}
+	file{"${ganglia_metrics_cron}":
+		ensure => $ens_dir,
+		       require => File["${ganglia_metrics}"],
 	}
 
 	file { ["${ganglia_metrics_cron}/1",
@@ -179,16 +190,9 @@ class ganglia::monitor::base ($ensure="present") {
 		"${ganglia_metrics_cron}/15",
 		"${ganglia_metrics_cron}/30",
 		"${ganglia_metrics_cron}/60"]:
-			ensure => $ensure ? {
-				"absent" => "absent",
-				default => "directory",
-			},
+			ensure => $ens_dir,
 		require => [ File["${ganglia_metrics}"],
 		File["${ganglia_metrics_cron}"] ],
-		owner => "root",
-		mode => 0700,
-		force => true,
-		recurse => true,
 	} 
 	Cron {
 		user => "root",
@@ -196,13 +200,14 @@ class ganglia::monitor::base ($ensure="present") {
 	}
 	$pre_cmd = "if [ -e ${ganglia_metrics}/run-metrics.sh ]; then " #mind the trailing whitespace
 		$post_cmd = " fi" #space at the beginning
+
 		cron{"ganglia-runmetrics-1":
 			command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/1;${post_cmd}",
-				minute => "*/1",
+			minute => "*/1",
 		}
 	cron{"ganglia-runmetrics-5":
 		command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/5;${post_cmd}",
-			minute => "*/5",
+		minute => "*/5",
 	}
 	cron{"ganglia-runmetrics-15":
 		command => "${pre_cmd} ${ganglia_metrics}/run-metrics.sh ${ganglia_metrics_cron}/15;${post_cmd}",

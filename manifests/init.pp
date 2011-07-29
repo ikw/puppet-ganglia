@@ -150,21 +150,6 @@ define ganglia::gmetric::cron(
 				err("runwhen can be only one of: 1,5,15,30,60") 
 			}
 	}
-	if defined(File["${ganglia_metrics_cron}"]){
-		debug("already defined.") 
-	}else{
-		file{"${ganglia_metrics_cron}":
-			ensure => $ensure ? {
-				"present" => "directory",
-					default => $ensure,
-			},
-			       force => true,
-			       recurse => true,
-			       owner => "root",
-			       mode => 0700,
-			       require => File["${ganglia_metrics}"],
-		}
-	}
 	file{"${ganglia_metrics_cron}/${runwhen}/${name_real}":
 		source => "puppet:///modules/${source_real}",
 		       owner => root,
