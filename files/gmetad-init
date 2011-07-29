@@ -1,5 +1,4 @@
 #! /bin/sh
-# $Id$
 ### BEGIN INIT INFO
 # Provides:          gmetad
 # Required-Start:    $network $named $remote_fs $syslog
@@ -15,8 +14,6 @@ DESC="Ganglia Monitor Meta-Daemon"
 test -x $DAEMON || exit 0
 
 set -e
-
-[[ -e /etc/default/$NAME ]] && . /etc/default/$NAME
 
 case "$1" in
   start)

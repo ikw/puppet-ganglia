@@ -18,10 +18,12 @@
 # _Sample Usage:_
 #   +include ganglia::webfrontend+
 #
-class ganglia::webfrontend {
-  $www_dir = "/usr/share/ganglia-webfrontend"
+class ganglia::webfrontend ($ensure="present",
+    $www_dir = "/var/www/gweb"  
+    ){
+  
     file{$www_dir:
-      source => "puppet:///modules/ganglia/ganglia-webfrontend",
+      source => "puppet:///modules/ganglia/ganglia-web2",
 	     recurse => true,
     }
 # include ganglia::metaserver::common
@@ -31,23 +33,23 @@ class ganglia::webfrontend {
     }      
   package{["libgd2-xpm"]:
     ensure => "present",
-	   before => Package["ganglia-webfrontend"],
+#	   before => Package["ganglia-webfrontend"],
   }
 
   webserver::apache2::virtualhost{"${fqdn}_80":
     servername => "${fqdn}",
-	       documentroot => "/var/www/gweb",
-	       serveradmin => "webmaster@ikw.uni-osnabrueck.de",
+      vhostaddress => "${fqdn}",
+	       documentroot => "${www_dir}",
+	       serveradmin => "webmaster@${domain}",
 	       syncconf => false,
 	       order => "000",
-	       additional => "Alias /munin/ /var/lib/munin/www/",
   }
   webserver::apache2::config{"ganglia-webfrontend":
     ensure => "absent",
   }
-  package{"ganglia-webfrontend":
-    ensure => "latest",
-  } 
+  #package{"ganglia-webfrontend":
+  #  ensure => "latest",
+  #} 
 
 #collect the meta configs for this host.  
   File <<| tag == "ganglia_metad_all" |>>

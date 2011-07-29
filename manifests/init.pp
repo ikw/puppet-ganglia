@@ -62,7 +62,12 @@ define ganglia::gmetric::python(
     debug("already defined.")
   }else{
     file{"${ganglia_mconf_dir}/conf.d":
-      ensure => "directory",
+      ensure => $ensure ? {
+          "present" => "directory",
+              default => $ensure,
+      },
+        force => true,
+                 recurse => true,
     }
   }
   file{"${ganglia_metrics_py}/${name}.py":
@@ -85,7 +90,9 @@ define ganglia::gmetric::python(
 		 source => "puppet:///modules/${additional_lib_source}/${additional_lib}",
 			ensure => $ensure,              
 			notify => Service["${service}"],
-	       }
+			    recurse => true,
+			    force => true,
+			}
 	     }
   }
 }
@@ -148,9 +155,11 @@ define ganglia::gmetric::cron(
   }else{
     file{"${ganglia_metrics_cron}":
       ensure => $ensure ? {
-	"absent" => "absent",
-	  default => "directory",
-      },
+        "present" => "directory",
+            default => $ensure,
+    },
+        force => true,
+         recurse => true,
 	     owner => "root",
 	     mode => 0700,
 	     require => File["${ganglia_metrics}"],
@@ -158,8 +167,9 @@ define ganglia::gmetric::cron(
   }
   if defined(File["${ganglia_metrics_cron}/${runwhen}"]){
     debug("already defined.") 
-  }else{
-    file{"${ganglia_metrics_cron}/${runwhen}":
+  } else {
+    
+      file{"${ganglia_metrics_cron}/${runwhen}":
       ensure => $ensure ? {
 	"absent" => "absent",
 	  default => "directory",

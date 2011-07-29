@@ -54,7 +54,7 @@ $conf['rrdtool_slope_mode'] = true;
 # ganglia-web only requires, and should use, the low-privilege socket
 # created with the -L option to rrdcached.  gmetad requires, and must use,
 # the fully privileged socket created with the -l option to rrdcached.
-$conf['rrdcached_socket'] = "unix:/var/run/rrdcached.limited.sock";
+#$conf['rrdcached_socket'] = "unix:/var/run/rrdcached.limited.sock";
 
 # Location for modular-graph files.
 $conf['graphdir']='./graph.d';
