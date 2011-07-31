@@ -41,14 +41,15 @@ class ganglia::webfrontend ($ensure="present",
 		ensure => $ensure,
 	}
 
-	webserver::apache2::virtualhost{"${fqdn}_80":
-		servername => "${fqdn}",
-			   vhostaddress => "${fqdn}",
-			   documentroot => "${www_dir}",
-			   serveradmin => "webmaster@${domain}",
-			   syncconf => false,
-			   order => "000",
-	}
+#	webserver::apache2::virtualhost{"${fqdn}_80":
+#		servername => "${fqdn}",
+#			   vhostaddress => "${fqdn}",
+#			   documentroot => "${www_dir}",
+#			   serveradmin => "webmaster@${domain}",
+#			   syncconf => false,
+#			   order => "000",
+#			   ensure => "absent"
+#	}
 
 #collect the meta configs for this host.  
 	File <<| tag == "ganglia_metad_all" |>>
