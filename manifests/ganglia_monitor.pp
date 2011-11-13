@@ -105,6 +105,7 @@ class ganglia::monitor ($ensure="present",
 		ensure => "${enabled}",
 		       enable => "${enabled}",
 		       pattern => "gmond",
+			hasstatus => false,
 	}
 
 	file{"${ganglia_mconf_dir}":

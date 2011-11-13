@@ -18,7 +18,7 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
+	start-stop-daemon --start --quiet -m --pidfile /var/run/$NAME.pid \
 		--exec $DAEMON -- --pid-file=/var/run/$NAME.pid
 	echo "$NAME."
 	;;
